@@ -1,0 +1,39 @@
+{
+  "task": {
+    "type": "task",
+    "content": "Create a simple Python hello world script",
+    "priority": "low",
+    "deadline": null,
+    "confidence": 0.95,
+    "entities": {
+      "action": "create",
+      "topic": "python hello world"
+    },
+    "id": "test_task_20250707_211900_0",
+    "source_file": "/app/data/tasks/test_task_20250707_211900.json",
+    "source_transcript": "/app/data/transcripts/test_transcript_2.json"
+  },
+  "context": {
+    "project": "general",
+    "execution_type": "create",
+    "working_directory": "/app/projects/general",
+    "requires_mcp": [
+      "filesystem"
+    ],
+    "sandbox_mode": false,
+    "approval_required": false,
+    "priority": "low"
+  },
+  "result": {
+    "success": true,
+    "response": "```hello_world.py\n# This is a simple Python \"Hello, World!\" script.\n\n# Print a greeting message to the console\nprint(\"Hello, World!\")\n\n# This script demonstrates the basic syntax for printing output in Python.\n# When executed, it will output the message \"Hello, World!\" to the console.\n```",
+    "files_created": [
+      "/app/projects/general/hello_world.py"
+    ],
+    "files_modified": [],
+    "executed_at": "2025-07-07T21:18:58.960758",
+    "working_directory": "/app/projects/general",
+    "execution_type": "create"
+  },
+  "saved_at": "2025-07-07T21:18:58.966754"
+}

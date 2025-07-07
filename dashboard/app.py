@@ -9,12 +9,14 @@ from datetime import datetime, timedelta
 from pathlib import Path
 from flask import Flask, render_template, jsonify, request
 import logging
+import tempfile
+import shutil
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-app = Flask(__name__)
+app = Flask(__name__, template_folder='/app/templates')
 app.config['SECRET_KEY'] = os.getenv('FLASK_SECRET_KEY', 'dev-key-change-in-production')
 
 # Initialize Redis connection
@@ -114,6 +116,201 @@ def api_processing_status():
         return jsonify(status_data)
     
     except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/upload-audio', methods=['POST'])
+def upload_audio():
+    """Upload audio file from web interface"""
+    try:
+        logger.info("=== Audio upload request received ===")
+        logger.info(f"Request files: {request.files}")
+        logger.info(f"Request form: {request.form}")
+        logger.info(f"Request content-type: {request.content_type}")
+        
+        if 'audio' not in request.files:
+            logger.error("No 'audio' field in request.files")
+            return jsonify({'error': 'No audio file provided'}), 400
+        
+        audio_file = request.files['audio']
+        logger.info(f"Audio file: {audio_file}")
+        logger.info(f"Audio filename: {audio_file.filename}")
+        logger.info(f"Audio content-type: {audio_file.content_type}")
+        
+        if audio_file.filename == '':
+            logger.error("Empty filename")
+            return jsonify({'error': 'No file selected'}), 400
+        
+        # Generate unique filename
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        filename = f"web-capture-{timestamp}.wav"
+        logger.info(f"Generated filename: {filename}")
+        
+        # Check audio directory
+        logger.info(f"Audio directory: {AUDIO_DIR}")
+        logger.info(f"Audio directory exists: {AUDIO_DIR.exists()}")
+        logger.info(f"Audio directory is writable: {os.access(AUDIO_DIR, os.W_OK)}")
+        
+        # Ensure audio directory exists
+        AUDIO_DIR.mkdir(parents=True, exist_ok=True)
+        
+        # Save to audio directory
+        audio_path = AUDIO_DIR / filename
+        logger.info(f"Target path: {audio_path}")
+        
+        # Save the uploaded file
+        try:
+            # Save directly without temp file
+            audio_file.save(str(audio_path))
+            logger.info(f"File saved successfully to {audio_path}")
+        except Exception as save_error:
+            logger.error(f"Error saving file: {save_error}")
+            logger.error(f"Current working directory: {os.getcwd()}")
+            logger.error(f"Directory permissions: {oct(os.stat(AUDIO_DIR).st_mode)}")
+            raise save_error
+        
+        # Verify file was saved
+        if not audio_path.exists():
+            logger.error(f"File not found after save: {audio_path}")
+            raise Exception("File save verification failed")
+        
+        file_size = audio_path.stat().st_size
+        logger.info(f"Audio file uploaded successfully: {filename} ({file_size} bytes)")
+        
+        # Update Redis if available
+        if redis_client:
+            try:
+                redis_client.hset(f"processing:{filename}", mapping={
+                    'status': 'pending',
+                    'uploaded_at': datetime.now().isoformat(),
+                    'source': 'web-upload',
+                    'data': json.dumps({'filename': filename})
+                })
+                redis_client.expire(f"processing:{filename}", 86400)  # 24 hours
+                logger.info("Redis updated successfully")
+            except Exception as e:
+                logger.warning(f"Failed to update Redis: {e}")
+        
+        return jsonify({
+            'success': True,
+            'filename': filename,
+            'size': file_size,
+            'message': 'Audio file uploaded successfully'
+        })
+        
+    except Exception as e:
+        logger.error(f"=== Error uploading audio ===")
+        logger.error(f"Error type: {type(e).__name__}")
+        logger.error(f"Error message: {str(e)}")
+        logger.error(f"Error details:", exc_info=True)
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/executions')
+def get_executions():
+    """Get task execution history"""
+    try:
+        if not redis_client:
+            return jsonify({'error': 'Redis not available'}), 503
+        
+        # Get recent execution keys
+        execution_keys = redis_client.lrange('execution_history', 0, 49)  # Last 50
+        executions = []
+        
+        for key in execution_keys:
+            data = redis_client.hgetall(key)
+            if data:
+                executions.append({
+                    'id': key.replace('execution:', ''),
+                    'status': data.get('status'),
+                    'updated_at': data.get('updated_at'),
+                    'task': json.loads(data.get('task', '{}')),
+                    'data': json.loads(data.get('data', '{}'))
+                })
+        
+        return jsonify(executions)
+    
+    except Exception as e:
+        logger.error(f"Error getting executions: {e}")
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/approvals')
+def get_pending_approvals():
+    """Get tasks pending approval"""
+    try:
+        if not redis_client:
+            return jsonify([])
+        
+        approval_keys = redis_client.keys('approval_queue:*')
+        approvals = []
+        
+        for key in approval_keys:
+            data = redis_client.hgetall(key)
+            if data:
+                approvals.append({
+                    'id': key.replace('approval_queue:', ''),
+                    'task': json.loads(data.get('task', '{}')),
+                    'context': json.loads(data.get('context', '{}')),
+                    'queued_at': data.get('queued_at')
+                })
+        
+        return jsonify(approvals)
+    
+    except Exception as e:
+        logger.error(f"Error getting approvals: {e}")
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/approvals/<approval_id>', methods=['POST'])
+def handle_approval(approval_id):
+    """Approve or reject a task"""
+    try:
+        if not redis_client:
+            return jsonify({'error': 'Redis not available'}), 503
+        
+        action = request.json.get('action')  # 'approve' or 'reject'
+        
+        if action not in ['approve', 'reject']:
+            return jsonify({'error': 'Invalid action'}), 400
+        
+        approval_key = f"approval_queue:{approval_id}"
+        
+        if action == 'approve':
+            # Move to approved queue for executor to pick up
+            data = redis_client.hgetall(approval_key)
+            if data:
+                approved_key = f"approved_tasks:{approval_id}"
+                redis_client.hset(approved_key, mapping=data)
+                redis_client.expire(approved_key, 3600)  # 1 hour to execute
+        
+        # Remove from approval queue
+        redis_client.delete(approval_key)
+        
+        return jsonify({'success': True, 'action': action})
+    
+    except Exception as e:
+        logger.error(f"Error handling approval: {e}")
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/projects')
+def list_projects():
+    """List all projects and their files"""
+    try:
+        projects_dir = Path('/app/projects')
+        projects = []
+        
+        if projects_dir.exists():
+            for project_path in projects_dir.iterdir():
+                if project_path.is_dir() and not project_path.name.startswith('.'):
+                    file_count = sum(1 for _ in project_path.rglob('*') if _.is_file())
+                    projects.append({
+                        'name': project_path.name,
+                        'path': str(project_path),
+                        'file_count': file_count,
+                        'modified': project_path.stat().st_mtime
+                    })
+        
+        return jsonify(sorted(projects, key=lambda p: p['name']))
+    
+    except Exception as e:
+        logger.error(f"Error listing projects: {e}")
         return jsonify({'error': str(e)}), 500
 
 @app.route('/health')

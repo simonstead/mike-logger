@@ -16,8 +16,10 @@ RUN pip install --no-cache-dir -r requirements-dashboard.txt
 
 # Copy dashboard code
 COPY dashboard/ ./dashboard/
-COPY static/ ./static/
 COPY templates/ ./templates/
+
+# Create static directory
+RUN mkdir -p static
 
 # Set environment variables
 ENV PYTHONPATH=/app

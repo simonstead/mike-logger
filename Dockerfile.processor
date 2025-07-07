@@ -22,17 +22,16 @@ RUN pip install git+https://github.com/openai/whisper.git
 
 # Copy application code
 COPY src/ ./src/
-COPY config/ ./config/
 
-# Create data directories
-RUN mkdir -p data/audio data/transcripts data/tasks logs
+# Create data and config directories
+RUN mkdir -p data/audio data/transcripts data/tasks logs config
 
 # Set environment variables
 ENV PYTHONPATH=/app
 ENV PYTHONUNBUFFERED=1
 
-# Pre-download Whisper model
-RUN python -c "import whisper; whisper.load_model('base')"
+# Create whisper cache directory (model will be downloaded on first run)
+RUN mkdir -p /root/.cache/whisper
 
 # Expose metrics port
 EXPOSE 8000

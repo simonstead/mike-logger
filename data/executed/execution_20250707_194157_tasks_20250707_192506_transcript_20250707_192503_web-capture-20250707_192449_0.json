@@ -1,0 +1,19 @@
+{
+  "task": {
+    "type": "task",
+    "content": "Write a read me file about anything",
+    "priority": "medium",
+    "deadline": null,
+    "confidence": 0.8,
+    "entities": {
+      "action": "write",
+      "topic": "readme file"
+    },
+    "id": "tasks_20250707_192506_transcript_20250707_192503_web-capture-20250707_192449_0",
+    "source_file": "/app/data/tasks/tasks_20250707_192506_transcript_20250707_192503_web-capture-20250707_192449.json",
+    "source_transcript": "/app/data/transcripts/transcript_20250707_192503_web-capture-20250707_192449.json"
+  },
+  "context": {
+    "project": "docs",
+    "execution_type": "create",
+    "working_directory": 

@@ -1,0 +1,29 @@
+{
+  "source_transcript": "/app/data/transcripts/test_transcript_2.json",
+  "extracted_at": "2025-07-07T21:19:00.000000",
+  "task_count": 2,
+  "tasks": [
+    {
+      "type": "task",
+      "content": "Create a simple Python hello world script",
+      "priority": "low",
+      "deadline": null,
+      "confidence": 0.95,
+      "entities": {
+        "action": "create",
+        "topic": "python hello world"
+      }
+    },
+    {
+      "type": "task", 
+      "content": "Write a README file about the Mike Logger project",
+      "priority": "medium",
+      "deadline": null,
+      "confidence": 0.9,
+      "entities": {
+        "action": "write",
+        "topic": "readme mike logger"
+      }
+    }
+  ]
+}

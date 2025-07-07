@@ -1,0 +1,41 @@
+{
+  "source_transcript": "/app/data/transcripts/test_transcript.json",
+  "extracted_at": "2025-07-07T20:35:00.000000",
+  "task_count": 3,
+  "tasks": [
+    {
+      "type": "task",
+      "content": "Create a Python script that calculates the factorial of a number",
+      "priority": "medium",
+      "deadline": null,
+      "confidence": 0.9,
+      "entities": {
+        "action": "create",
+        "topic": "python script factorial"
+      }
+    },
+    {
+      "type": "task",
+      "content": "Write a README file explaining how to use the Mike Logger system",
+      "priority": "medium",
+      "deadline": null,
+      "confidence": 0.95,
+      "entities": {
+        "action": "write",
+        "topic": "readme documentation"
+      }
+    },
+    {
+      "type": "reminder",
+      "content": "Remember to check the server logs tomorrow at 3 PM",
+      "priority": "high",
+      "deadline": "2025-07-08T15:00:00",
+      "confidence": 0.85,
+      "entities": {
+        "action": "check",
+        "topic": "server logs",
+        "time": "tomorrow 3pm"
+      }
+    }
+  ]
+}

@@ -1,0 +1,96 @@
+{
+  "personal": {
+    "created_at": "2025-07-07T21:29:52.849185",
+    "keywords": [
+      "personal"
+    ],
+    "description": "",
+    "file_count": 1,
+    "last_modified": "2025-07-07T21:29:52.849185"
+  },
+  "general": {
+    "created_at": "2025-07-07T21:30:02.603983",
+    "keywords": [
+      "general"
+    ],
+    "description": "",
+    "file_count": 7,
+    "last_modified": "2025-07-07T21:30:02.603983"
+  },
+  "mike_logger": {
+    "created_at": "2025-07-07T21:19:03.518599",
+    "keywords": [
+      "that",
+      "and",
+      "overview",
+      "variety",
+      "efficient",
+      "used",
+      "provides",
+      "log",
+      "data",
+      "way",
+      "audio",
+      "project",
+      "mike",
+      "from",
+      "logger",
+      "microphone",
+      "simple",
+      "designed"
+    ],
+    "description": "Mike Logger is a project that provides a simple and efficient way to log audio data from a microphone. It is designed to be used in a variety of applications, such as voice recording, audio analysis, ",
+    "file_count": 1,
+    "last_modified": "2025-07-07T21:19:03.518599"
+  },
+  "docs": {
+    "created_at": "2025-07-07T21:21:15.821521",
+    "keywords": [
+      "docs",
+      "space",
+      "exploration",
+      "table",
+      "current",
+      "plans",
+      "contents",
+      "future",
+      "history",
+      "missions",
+      "for"
+    ],
+    "description": "1. [History of Space Exploration](#history-of-space-exploration)",
+    "file_count": 1,
+    "last_modified": "2025-07-07T21:21:15.821521"
+  },
+  "work": {
+    "created_at": "2025-07-07T19:40:37.273504",
+    "keywords": [
+      "work"
+    ],
+    "description": "",
+    "file_count": 0,
+    "last_modified": "2025-07-07T19:40:37.273484"
+  },
+  "weather_tracker": {
+    "created_at": "2025-07-07T21:30:19.971139",
+    "keywords": [
+      "weather",
+      "tracker",
+      "project"
+    ],
+    "description": "Project for: Create a new project called weather_tracker for monitoring weather data...",
+    "file_count": 0,
+    "last_modified": "2025-07-07T21:30:19.971154"
+  },
+  "game": {
+    "created_at": "2025-07-07T21:30:31.224623",
+    "keywords": [
+      "game",
+      "player",
+      "scoring"
+    ],
+    "description": "Project for: Create a game with player scoring and level progression...",
+    "file_count": 0,
+    "last_modified": "2025-07-07T21:30:31.224674"
+  }
+}

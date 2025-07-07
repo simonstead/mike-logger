@@ -40,8 +40,6 @@ services:
     command: redis-server --appendonly yes
     volumes:
       - redis-data:/data
-    ports:
-      - "6379:6379"
     restart: unless-stopped
 
   # Optional: Web dashboard for monitoring
@@ -54,7 +52,7 @@ services:
       - REDIS_URL=redis://redis:6379
       - FLASK_ENV=${FLASK_ENV:-production}
     volumes:
-      - ./data:/app/data:ro
+      - ./data:/app/data
       - ./logs:/app/logs:ro
     ports:
       - "8080:8080"
@@ -74,6 +72,28 @@ services:
     command:
       - '--config.file=/etc/prometheus/prometheus.yml'
       - '--storage.tsdb.path=/prometheus'
+    restart: unless-stopped
+
+  # Task Executor - executes extracted tasks
+  task-executor:
+    build:
+      context: .
+      dockerfile: Dockerfile.executor
+    container_name: mike-logger-executor
+    environment:
+      - REDIS_URL=redis://redis:6379
+      - LOG_LEVEL=${LOG_LEVEL:-INFO}
+      - SIMULATE_EXECUTION=${SIMULATE_EXECUTION:-true}  # Set to false when Claude Code is available
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+    volumes:
+      - ./data:/app/data
+      - ./projects:/app/projects
+      - ./logs:/app/logs
+      # Mount claude-code binary when available
+      # - /usr/local/bin/claude-code:/usr/local/bin/claude-code:ro
+    depends_on:
+      - redis
+      - processor
     restart: unless-stopped
 
 volumes:

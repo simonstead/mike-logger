@@ -1,0 +1,39 @@
+{
+  "task": {
+    "type": "task",
+    "content": "Create a game with player scoring and level progression",
+    "priority": "medium",
+    "deadline": null,
+    "confidence": 0.85,
+    "entities": {
+      "action": "create",
+      "topic": "game player scoring"
+    },
+    "id": "test_project_detection_2",
+    "source_file": "/app/data/tasks/test_project_detection.json",
+    "source_transcript": "/app/data/transcripts/project_detection_test.json"
+  },
+  "context": {
+    "project": "general",
+    "execution_type": "create",
+    "working_directory": "/app/projects/general",
+    "requires_mcp": [
+      "filesystem"
+    ],
+    "sandbox_mode": false,
+    "approval_required": false,
+    "priority": "medium"
+  },
+  "result": {
+    "success": true,
+    "response": "```game.py\nimport random\n\nclass Player:\n    def __init__(self, name):\n        self.name = name\n        self.score = 0\n        self.level = 1\n\n    def update_score(self, points):\n        self.score += points\n\n    def level_up(self):\n        self.level += 1\n\nclass Game:\n    def __init__(self, num_players):\n        self.players = [Player(f\"Player {i+1}\") for i in range(num_players)]\n        self.current_level = 1\n\n    def play_round(self):\n        print(f\"Welcome to Level {self.current_level}!\")\n\n        for player in self.players:\n            points = random.randint(10, 50)\n            player.update_score(points)\n            print(f\"{player.name} scored {points} points!\")\n\n        if all(player.score >= self.current_level * 100 for player in self.players):\n            self.current_level += 1\n            print(\"All players have reached the next level!\")\n            for player in self.players:\n                player.level_up()\n        else:\n            print(\"Not all players have reached the next level yet.\")\n\n    def run_game(self):\n        while self.current_level <= 5:\n            self.play_round()\n        print(\"Game over!\")\n        for player in self.players:\n            print(f\"{player.name} reached level {player.level} with a score of {player.score}.\")\n\n# Example usage\ngame = Game(4)\ngame.run_game()\n```\n\nThis Python script implements a simple game with player scoring and level progression. Here's a breakdown of the code:\n\n1. The `Player` class represents a player in the game, with attributes for their name, score, and current level.\n2. The `Game` class manages the overall game, including the list of players and the current level.\n3. The `play_round()` method simulates a single round of the game, where each player is awarded a random number of points, and the game level is advanced if all players have reached the required score for the current level.\n4. The `run_game()` method runs the game until the maximum level (5) is reached, and then prints the final scores and levels for each player.\n\nThe code follows best practices for Python, including:\n- Use of classes to encapsulate game logic\n- Descriptive variable and method names\n- Separation of concerns between the `Player` and `Game` classes\n- Error handling and input validation (not included in this example)\n- Modularity and extensibility for future improvements",
+    "files_created": [
+      "/app/projects/general/game.py"
+    ],
+    "files_modified": [],
+    "executed_at": "2025-07-07T21:30:02.605173",
+    "working_directory": "/app/projects/general",
+    "execution_type": "create"
+  },
+  "saved_at": "2025-07-07T21:30:02.618559"
+}

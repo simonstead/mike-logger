@@ -1,0 +1,27 @@
+FROM python:3.11-slim
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    curl \
+    git \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install Python dependencies
+WORKDIR /app
+
+COPY requirements.executor.txt .
+RUN pip install --no-cache-dir -r requirements.executor.txt
+
+# Copy application code
+COPY src/task_executor.py /app/
+COPY src/project_manager.py /app/src/
+
+# Create necessary directories
+RUN mkdir -p /app/data/tasks /app/data/executed /app/projects /app/logs \
+    /app/data/tasks/processed /app/.config/mcp
+
+# Create project structure
+RUN mkdir -p /app/projects/general /app/projects/mike_logger \
+    /app/projects/docs /app/projects/work /app/projects/personal
+
+CMD ["python", "task_executor.py"]

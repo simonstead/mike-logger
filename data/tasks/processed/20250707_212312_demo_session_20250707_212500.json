@@ -1,0 +1,63 @@
+{
+  "source_transcript": "/app/data/transcripts/demo_session_transcript.json",
+  "extracted_at": "2025-07-07T21:25:00.000000",
+  "task_count": 5,
+  "tasks": [
+    {
+      "type": "task",
+      "content": "Create a Python script to calculate fibonacci numbers up to n terms",
+      "priority": "medium",
+      "deadline": null,
+      "confidence": 0.9,
+      "entities": {
+        "action": "create",
+        "topic": "python fibonacci calculator"
+      }
+    },
+    {
+      "type": "task",
+      "content": "Write documentation for the Mike Logger API endpoints",
+      "priority": "high",
+      "deadline": null,
+      "confidence": 0.85,
+      "entities": {
+        "action": "write",
+        "topic": "api documentation"
+      }
+    },
+    {
+      "type": "reminder",
+      "content": "Remember to review the server logs tomorrow morning",
+      "priority": "medium",
+      "deadline": "2025-07-08T09:00:00",
+      "confidence": 0.8,
+      "entities": {
+        "action": "review",
+        "topic": "server logs",
+        "time": "tomorrow morning"
+      }
+    },
+    {
+      "type": "idea",
+      "content": "Add voice activity detection to improve audio segmentation",
+      "priority": "low",
+      "deadline": null,
+      "confidence": 0.75,
+      "entities": {
+        "action": "add",
+        "topic": "voice activity detection"
+      }
+    },
+    {
+      "type": "task",
+      "content": "Create a simple web page with HTML and CSS for the project homepage",
+      "priority": "medium",
+      "deadline": null,
+      "confidence": 0.95,
+      "entities": {
+        "action": "create",
+        "topic": "web page homepage"
+      }
+    }
+  ]
+}

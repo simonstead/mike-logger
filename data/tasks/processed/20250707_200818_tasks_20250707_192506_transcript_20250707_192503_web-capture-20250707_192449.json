@@ -1,0 +1,18 @@
+{
+  "source_transcript": "/app/data/transcripts/transcript_20250707_192503_web-capture-20250707_192449.json",
+  "extracted_at": "2025-07-07T19:25:06.199674",
+  "task_count": 1,
+  "tasks": [
+    {
+      "type": "task",
+      "content": "Write a read me file about anything",
+      "priority": "medium",
+      "deadline": null,
+      "confidence": 0.8,
+      "entities": {
+        "action": "write",
+        "topic": "readme file"
+      }
+    }
+  ]
+}

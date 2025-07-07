@@ -1,0 +1,38 @@
+{
+  "task": {
+    "type": "task",
+    "content": "Create a Python script that calculates the factorial of a number",
+    "priority": "medium",
+    "deadline": null,
+    "confidence": 0.9,
+    "entities": {
+      "action": "create",
+      "topic": "python script factorial"
+    },
+    "id": "test_task_20250707_203500_0",
+    "source_file": "/app/data/tasks/test_task_20250707_203500.json",
+    "source_transcript": "/app/data/transcripts/test_transcript.json"
+  },
+  "context": {
+    "project": "general",
+    "execution_type": "create",
+    "working_directory": "/app/projects/general",
+    "requires_mcp": [
+      "filesystem"
+    ],
+    "sandbox_mode": false,
+    "approval_required": false,
+    "priority": "medium"
+  },
+  "result": {
+    "success": true,
+    "stdout": "Would create file based on: Create a Python script that calculates the factorial of a number",
+    "stderr": "",
+    "return_code": 0,
+    "executed_at": "2025-07-07T21:16:11.291847",
+    "working_directory": "/app/projects/general",
+    "command": "SIMULATED",
+    "simulation": true
+  },
+  "saved_at": "2025-07-07T21:16:11.293333"
+}

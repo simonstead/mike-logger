@@ -1,0 +1,42 @@
+{
+  "task": {
+    "type": "task",
+    "content": "Create a new project called weather_tracker for monitoring weather data",
+    "priority": "medium",
+    "deadline": null,
+    "confidence": 0.95,
+    "entities": {
+      "action": "create",
+      "topic": "weather tracker project"
+    },
+    "id": "test_project_detection_0",
+    "source_file": "/app/data/tasks/test_project_detection.json",
+    "source_transcript": "/app/data/transcripts/project_detection_test.json"
+  },
+  "context": {
+    "project": "weather_tracker",
+    "is_new_project": true,
+    "project_confidence": 0.9,
+    "execution_type": "create",
+    "working_directory": "/app/projects/weather_tracker",
+    "requires_mcp": [
+      "filesystem",
+      "sqlite"
+    ],
+    "sandbox_mode": false,
+    "approval_required": false,
+    "priority": "medium"
+  },
+  "result": {
+    "success": true,
+    "response": "```weather_tracker.py\nimport os\nimport requests\nimport json\nfrom datetime import datetime\n\n# Project: Weather Tracker\n# Purpose: Monitor and track weather data for a specific location\n\n# Working Directory: /app/projects/weather_tracker\n# Project Context: weather_tracker\n\n# Configuration\nWEATHER_API_KEY = os.environ.get('WEATHER_API_KEY')\nLOCATION = 'New York, NY'\nUNITS = 'metric'\n\ndef get_current_weather():\n    \"\"\"\n    Fetch current weather data for the specified location.\n    \n    Returns:\n        dict: Current weather data, including temperature, humidity, wind speed, and more.\n    \"\"\"\n    url = f'http://api.openweathermap.org/data/2.5/weather?q={LOCATION}&appid={WEATHER_API_KEY}&units={UNITS}'\n    response = requests.get(url)\n    return response.json()\n\ndef get_forecast():\n    \"\"\"\n    Fetch weather forecast data for the specified location.\n    \n    Returns:\n        dict: Weather forecast data for the next 5 days.\n    \"\"\"\n    url = f'http://api.openweathermap.org/data/2.5/forecast?q={LOCATION}&appid={WEATHER_API_KEY}&units={UNITS}'\n    response = requests.get(url)\n    return response.json()\n\ndef main():\n    \"\"\"\n    Main function to run the weather tracking application.\n    \"\"\"\n    print(f'Weather Tracker - Monitoring weather for {LOCATION}')\n\n    current_weather = get_current_weather()\n    print(f'Current Weather: {current_weather[\"weather\"][0][\"description\"]}')\n    print(f'Temperature: {current_weather[\"main\"][\"temp\"]}\u00b0C')\n    print(f'Humidity: {current_weather[\"main\"][\"humidity\"]}%')\n    print(f'Wind Speed: {current_weather[\"wind\"][\"speed\"]} m/s')\n\n    forecast = get_forecast()\n    print('\\nUpcoming Forecast:')\n    for forecast_data in forecast['list']:\n        forecast_time = datetime.strptime(forecast_data['dt_txt'], '%Y-%m-%d %H:%M:%S')\n        print(f'{forecast_time.strftime(\"%Y-%m-%d %H:%M\")}: {forecast_data[\"weather\"][0][\"description\"]} - {forecast_data[\"main\"][\"temp\"]}\u00b0C')\n\nif __name__ == '__main__':\n    main()\n```\n\nThe `weather_tracker.py` file creates a new project called `weather_tracker` for monitoring weather data. It uses the OpenWeatherMap API to fetch current weather and forecast data for a specified location (in this case, New York, NY). The script prints the current weather conditions and the upcoming 5-day forecast.\n\nThe file follows best practices for Python development, including:\n\n1. Importing necessary modules (os, requests, json, datetime)\n2. Defining configuration variables (API key, location, units)\n3. Implementing two functions to fetch current weather and forecast data\n4. Defining a main function to run the application\n5. Adding docstrings to explain the purpose of each function\n6. Handling the script's entry point with the `if __name__ == '__main__'` block\n\nThis script can be easily extended to include additional features, such as saving the weather data to a file, sending alerts based on certain weather conditions, or integrating with other systems.",
+    "files_created": [
+      "/app/projects/weather_tracker/weather_tracker.py"
+    ],
+    "files_modified": [],
+    "executed_at": "2025-07-07T21:30:26.133283",
+    "working_directory": "/app/projects/weather_tracker",
+    "execution_type": "create"
+  },
+  "saved_at": "2025-07-07T21:30:26.139456"
+}

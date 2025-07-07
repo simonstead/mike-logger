@@ -21,14 +21,15 @@ services:
     # Enable development mode
     environment:
       - FLASK_ENV=development
-    # Mount templates for live reloading
+    # Mount templates for live reloading and make data writable
     volumes:
       - ./dashboard:/app/dashboard:ro
       - ./templates:/app/templates:ro
+      - ./data:/app/data:rw  # Make data directory writable
     # Enable debug mode
     command: ["python", "dashboard/app.py"]
 
   redis:
-    # Expose Redis port for debugging
+    # Expose Redis port for debugging (using different port to avoid conflicts)
     ports:
-      - "6379:6379"
+      - "6380:6379"

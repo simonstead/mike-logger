@@ -70,10 +70,21 @@ class AudioProcessor:
         # Initialize Whisper
         logger.info(f"Loading Whisper model: {self.whisper_model_name}")
         try:
-            self.whisper_model = whisper.load_model(self.whisper_model_name)
-            logger.info("Whisper model loaded successfully")
+            # Try to load model with retry logic for download issues
+            for attempt in range(3):
+                try:
+                    self.whisper_model = whisper.load_model(self.whisper_model_name)
+                    logger.info("Whisper model loaded successfully")
+                    break
+                except Exception as e:
+                    if attempt < 2:
+                        logger.warning(f"Attempt {attempt + 1} failed to load Whisper model: {e}")
+                        logger.info("Retrying in 10 seconds...")
+                        time.sleep(10)
+                    else:
+                        raise e
         except Exception as e:
-            logger.error(f"Failed to load Whisper model: {e}")
+            logger.error(f"Failed to load Whisper model after 3 attempts: {e}")
             ERRORS.labels(error_type='whisper_init').inc()
             raise
             
