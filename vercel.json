@@ -1,27 +1,15 @@
 {
   "version": 2,
-  "builds": [
+  "cleanUrls": true,
+  "trailingSlash": false,
+  "rewrites": [
     {
-      "src": "index.html",
-      "use": "@vercel/static"
+      "source": "/setup-guide",
+      "destination": "/setup-guide.html"
     },
     {
-      "src": "setup-guide.html",
-      "use": "@vercel/static"
-    }
-  ],
-  "routes": [
-    {
-      "src": "/",
-      "dest": "/index.html"
-    },
-    {
-      "src": "/setup-guide",
-      "dest": "/setup-guide.html"
-    },
-    {
-      "src": "/setup",
-      "dest": "/setup-guide.html"
+      "source": "/setup",
+      "destination": "/setup-guide.html"
     }
   ],
   "headers": [
