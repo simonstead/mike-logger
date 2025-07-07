@@ -75,3 +75,4 @@ data/audio/.gitkeep
 data/transcripts/.gitkeep
 data/tasks/.gitkeep
 logs/.gitkeep
+.vercel

@@ -10,8 +10,11 @@ services:
     environment:
       - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
       - WHISPER_MODEL=${WHISPER_MODEL:-base}
+      - WHISPER_LANGUAGE=${WHISPER_LANGUAGE:-en}
       - PROCESSING_INTERVAL=${PROCESSING_INTERVAL:-30}
       - LOG_LEVEL=${LOG_LEVEL:-INFO}
+      - REDIS_URL=redis://redis:6379
+      - METRICS_PORT=8000
     volumes:
       # Shared volumes for audio exchange
       - ./data/audio:/app/data/audio
@@ -20,6 +23,8 @@ services:
       - ./logs:/app/logs
       # Mount whisper cache to avoid re-downloading models
       - whisper-cache:/root/.cache/whisper
+    depends_on:
+      - redis
     restart: unless-stopped
     deploy:
       resources:

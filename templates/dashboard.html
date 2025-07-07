@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mike Logger Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f5f5;
+            color: #333;
+        }
+
+        .header {
+            background: #2563eb;
+            color: white;
+            padding: 1rem 2rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .header h1 {
+            font-size: 1.8rem;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #2563eb;
+        }
+
+        .stat-label {
+            color: #666;
+            margin-top: 0.5rem;
+        }
+
+        .section {
+            background: white;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .section h2 {
+            margin-bottom: 1rem;
+            color: #2563eb;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .tab {
+            padding: 0.75rem 1.5rem;
+            background: none;
+            border: none;
+            border-bottom: 2px solid transparent;
+            cursor: pointer;
+            color: #666;
+            transition: all 0.2s;
+        }
+
+        .tab.active {
+            color: #2563eb;
+            border-bottom-color: #2563eb;
+        }
+
+        .tab:hover {
+            background: #f0f9ff;
+        }
+
+        .file-list {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .file-item {
+            display: flex;
+            justify-content: between;
+            align-items: center;
+            padding: 0.75rem;
+            border-bottom: 1px solid #eee;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .file-item:hover {
+            background: #f9fafb;
+        }
+
+        .file-name {
+            font-weight: 500;
+        }
+
+        .file-meta {
+            font-size: 0.875rem;
+            color: #666;
+            margin-left: auto;
+        }
+
+        .status-indicator {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            margin-right: 0.5rem;
+        }
+
+        .status-active { background: #10b981; }
+        .status-idle { background: #6b7280; }
+        .status-error { background: #ef4444; }
+
+        .refresh-button {
+            background: #2563eb;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            cursor: pointer;
+            float: right;
+        }
+
+        .refresh-button:hover {
+            background: #1d4ed8;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 2rem;
+            color: #666;
+        }
+
+        .error {
+            background: #fef2f2;
+            color: #dc2626;
+            padding: 1rem;
+            border-radius: 4px;
+            margin: 1rem 0;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .tabs {
+                flex-wrap: wrap;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🎤 Mike Logger Dashboard</h1>
+    </div>
+
+    <div class="container">
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-value" id="audio-count">{{ stats.audio_files }}</div>
+                <div class="stat-label">Audio Files in Queue</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="transcript-count">{{ stats.transcripts }}</div>
+                <div class="stat-label">Transcripts Generated</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="task-count">{{ stats.tasks }}</div>
+                <div class="stat-label">Tasks Extracted</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">
+                    <span class="status-indicator status-{{ stats.processing_status }}"></span>
+                    <span id="processing-status">{{ stats.processing_status.title() }}</span>
+                </div>
+                <div class="stat-label">Processing Status</div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>
+                File Browser
+                <button class="refresh-button" onclick="refreshData()">Refresh</button>
+            </h2>
+            
+            <div class="tabs">
+                <button class="tab active" onclick="showFileType('audio')">Audio Files</button>
+                <button class="tab" onclick="showFileType('transcripts')">Transcripts</button>
+                <button class="tab" onclick="showFileType('tasks')">Tasks</button>
+            </div>
+
+            <div id="file-list" class="file-list">
+                <div class="loading">Loading files...</div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>Processing Queue</h2>
+            <div id="processing-queue">
+                <div class="loading">Loading processing status...</div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>System Information</h2>
+            <div>
+                <strong>Redis Status:</strong> 
+                <span class="status-indicator status-{{ 'active' if stats.redis_available else 'error' }}"></span>
+                {{ 'Connected' if stats.redis_available else 'Disconnected' }}
+            </div>
+            <div style="margin-top: 0.5rem;">
+                <strong>Last Updated:</strong> 
+                <span id="last-updated">{{ stats.last_updated }}</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentFileType = 'audio';
+
+        async function refreshData() {
+            try {
+                // Update stats
+                const statsResponse = await fetch('/api/stats');
+                const stats = await statsResponse.json();
+                
+                document.getElementById('audio-count').textContent = stats.audio_files;
+                document.getElementById('transcript-count').textContent = stats.transcripts;
+                document.getElementById('task-count').textContent = stats.tasks;
+                document.getElementById('processing-status').textContent = stats.processing_status.charAt(0).toUpperCase() + stats.processing_status.slice(1);
+                document.getElementById('last-updated').textContent = new Date(stats.last_updated).toLocaleString();
+
+                // Update status indicators
+                const statusIndicators = document.querySelectorAll('.status-indicator');
+                statusIndicators.forEach(indicator => {
+                    indicator.className = `status-indicator status-${stats.processing_status}`;
+                });
+
+                // Refresh current file list
+                showFileType(currentFileType);
+                
+                // Refresh processing queue
+                refreshProcessingQueue();
+
+            } catch (error) {
+                console.error('Failed to refresh data:', error);
+                showError('Failed to refresh data');
+            }
+        }
+
+        async function showFileType(type) {
+            currentFileType = type;
+            
+            // Update tab styling
+            document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+            event.target.classList.add('active');
+
+            const fileList = document.getElementById('file-list');
+            fileList.innerHTML = '<div class="loading">Loading files...</div>';
+
+            try {
+                const response = await fetch(`/api/files?type=${type}`);
+                const files = await response.json();
+
+                if (files.length === 0) {
+                    fileList.innerHTML = '<div class="loading">No files found</div>';
+                    return;
+                }
+
+                fileList.innerHTML = files.map(file => `
+                    <div class="file-item" onclick="viewFile('${file.path}')">
+                        <div>
+                            <div class="file-name">${file.name}</div>
+                            <div class="file-meta">
+                                ${formatFileSize(file.size)} • ${new Date(file.modified_iso).toLocaleString()}
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+
+            } catch (error) {
+                console.error('Failed to load files:', error);
+                fileList.innerHTML = '<div class="error">Failed to load files</div>';
+            }
+        }
+
+        async function refreshProcessingQueue() {
+            const queueDiv = document.getElementById('processing-queue');
+            
+            try {
+                const response = await fetch('/api/processing-status');
+                const queue = await response.json();
+
+                if (queue.error) {
+                    queueDiv.innerHTML = `<div class="error">Error: ${queue.error}</div>`;
+                    return;
+                }
+
+                if (queue.length === 0) {
+                    queueDiv.innerHTML = '<div class="loading">No files in processing queue</div>';
+                    return;
+                }
+
+                queueDiv.innerHTML = queue.map(item => `
+                    <div class="file-item">
+                        <div>
+                            <div class="file-name">${item.filename}</div>
+                            <div class="file-meta">
+                                Status: ${item.status} • ${new Date(item.updated_at).toLocaleString()}
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+
+            } catch (error) {
+                console.error('Failed to load processing queue:', error);
+                queueDiv.innerHTML = '<div class="error">Failed to load processing queue</div>';
+            }
+        }
+
+        async function viewFile(path) {
+            try {
+                const response = await fetch(`/api/file/${encodeURIComponent(path)}`);
+                const fileData = await response.json();
+
+                if (fileData.error) {
+                    alert('Error: ' + fileData.error);
+                    return;
+                }
+
+                // Create modal or new window to show file content
+                const newWindow = window.open('', '_blank');
+                newWindow.document.write(`
+                    <html>
+                        <head>
+                            <title>${fileData.filename}</title>
+                            <style>
+                                body { font-family: monospace; padding: 20px; background: #f5f5f5; }
+                                pre { background: white; padding: 20px; border-radius: 8px; overflow-x: auto; }
+                            </style>
+                        </head>
+                        <body>
+                            <h1>${fileData.filename}</h1>
+                            <p>Size: ${formatFileSize(fileData.size)} | Modified: ${new Date(fileData.modified * 1000).toLocaleString()}</p>
+                            <pre>${typeof fileData.content === 'object' ? JSON.stringify(fileData.content, null, 2) : fileData.content}</pre>
+                        </body>
+                    </html>
+                `);
+
+            } catch (error) {
+                console.error('Failed to view file:', error);
+                alert('Failed to load file');
+            }
+        }
+
+        function formatFileSize(bytes) {
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            if (bytes === 0) return '0 Bytes';
+            const i = Math.floor(Math.log(bytes) / Math.log(1024));
+            return Math.round(bytes / Math.pow(1024, i) * 100) / 100 + ' ' + sizes[i];
+        }
+
+        function showError(message) {
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'error';
+            errorDiv.textContent = message;
+            document.querySelector('.container').insertBefore(errorDiv, document.querySelector('.container').firstChild);
+            
+            setTimeout(() => errorDiv.remove(), 5000);
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            showFileType('audio');
+            refreshProcessingQueue();
+            
+            // Auto-refresh every 30 seconds
+            setInterval(refreshData, 30000);
+        });
+    </script>
+</body>
+</html>
