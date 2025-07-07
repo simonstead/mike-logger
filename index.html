@@ -1,0 +1,804 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mike Logger - Always-On Voice Assistant</title>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --secondary: #1e40af;
+            --accent: #3b82f6;
+            --bg: #f8fafc;
+            --card-bg: #ffffff;
+            --text: #334155;
+            --text-light: #64748b;
+            --border: #e2e8f0;
+            --code-bg: #f1f5f9;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        header {
+            background: var(--card-bg);
+            border-bottom: 1px solid var(--border);
+            padding: 2rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(10px);
+            background: rgba(255, 255, 255, 0.9);
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        h1 {
+            font-size: 2rem;
+            color: var(--primary);
+        }
+
+        nav ul {
+            list-style: none;
+            display: flex;
+            gap: 2rem;
+        }
+
+        nav a {
+            text-decoration: none;
+            color: var(--text);
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+
+        nav a:hover {
+            color: var(--primary);
+        }
+
+        .hero {
+            padding: 4rem 0;
+            text-align: center;
+        }
+
+        .hero h2 {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero p {
+            font-size: 1.25rem;
+            color: var(--text-light);
+            max-width: 600px;
+            margin: 0 auto 2rem;
+        }
+
+        .architecture-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+            margin: 2rem 0;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+        }
+
+        .card h3 {
+            color: var(--primary);
+            margin-bottom: 1rem;
+            font-size: 1.5rem;
+        }
+
+        .card h4 {
+            color: var(--secondary);
+            margin: 1rem 0 0.5rem;
+        }
+
+        .card ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .card li {
+            padding: 0.5rem 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .card li:last-child {
+            border-bottom: none;
+        }
+
+        .card li:before {
+            content: "→ ";
+            color: var(--accent);
+            font-weight: bold;
+        }
+
+        .diagram {
+            background: var(--code-bg);
+            border-radius: 8px;
+            padding: 2rem;
+            margin: 2rem 0;
+            overflow-x: auto;
+        }
+
+        .diagram pre {
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+
+        .section {
+            padding: 3rem 0;
+        }
+
+        .section h2 {
+            font-size: 2rem;
+            color: var(--primary);
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+
+        .feature {
+            text-align: center;
+            padding: 1.5rem;
+        }
+
+        .feature-icon {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1rem;
+            font-size: 1.5rem;
+            color: white;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            border-bottom: 2px solid var(--border);
+        }
+
+        .tab {
+            padding: 1rem 2rem;
+            background: none;
+            border: none;
+            font-size: 1rem;
+            cursor: pointer;
+            color: var(--text-light);
+            transition: color 0.2s;
+            position: relative;
+        }
+
+        .tab.active {
+            color: var(--primary);
+        }
+
+        .tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: var(--primary);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .code-block {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 1.5rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 1rem 0;
+        }
+
+        .code-block pre {
+            margin: 0;
+            font-family: 'Fira Code', 'Courier New', monospace;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+
+        .timeline {
+            position: relative;
+            padding: 2rem 0;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 50%;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: var(--border);
+        }
+
+        .timeline-item {
+            position: relative;
+            padding: 2rem;
+            width: calc(50% - 2rem);
+            margin-bottom: 2rem;
+        }
+
+        .timeline-item:nth-child(odd) {
+            margin-left: auto;
+        }
+
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            width: 16px;
+            height: 16px;
+            background: var(--primary);
+            border-radius: 50%;
+            top: 2rem;
+        }
+
+        .timeline-item:nth-child(odd)::before {
+            left: -2.5rem;
+        }
+
+        .timeline-item:nth-child(even)::before {
+            right: -2.5rem;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 2rem;
+            margin: 2rem 0;
+        }
+
+        .stat {
+            text-align: center;
+            padding: 2rem;
+            background: var(--card-bg);
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: var(--primary);
+        }
+
+        .stat-label {
+            color: var(--text-light);
+            margin-top: 0.5rem;
+        }
+
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            nav ul {
+                flex-direction: column;
+                gap: 1rem;
+                text-align: center;
+            }
+
+            .hero h2 {
+                font-size: 2rem;
+            }
+
+            .timeline::before {
+                left: 2rem;
+            }
+
+            .timeline-item {
+                width: 100%;
+                margin-left: 3rem !important;
+            }
+
+            .timeline-item::before {
+                left: -2.5rem !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="header-content">
+                <h1>🎤 Mike Logger</h1>
+                <nav>
+                    <ul>
+                        <li><a href="#overview">Overview</a></li>
+                        <li><a href="#architecture">Architecture</a></li>
+                        <li><a href="#implementation">Implementation</a></li>
+                        <li><a href="#security">Security</a></li>
+                        <li><a href="#getting-started">Get Started</a></li>
+                        <li><a href="setup-guide.html" style="background: var(--accent); color: white; padding: 0.5rem 1rem; border-radius: 4px;">Setup Guide</a></li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <section class="hero">
+            <div class="container">
+                <h2>Always-On Voice Assistant</h2>
+                <p>Continuous voice capture, private speech-to-text processing, and intelligent task extraction - all running on your own infrastructure.</p>
+                <div style="margin: 2rem 0;">
+                    <a href="setup-guide.html" style="background: var(--primary); color: white; padding: 1rem 2rem; border-radius: 8px; text-decoration: none; font-weight: 600; display: inline-block; transition: background 0.2s;" onmouseover="this.style.background='var(--secondary)'" onmouseout="this.style.background='var(--primary)'">
+                        🚀 Complete Setup Guide
+                    </a>
+                </div>
+                <div class="stats">
+                    <div class="stat">
+                        <div class="stat-value">100%</div>
+                        <div class="stat-label">Private & Secure</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-value">24/7</div>
+                        <div class="stat-label">Continuous Capture</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-value">&lt;10s</div>
+                        <div class="stat-label">Processing Time</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-value">$0</div>
+                        <div class="stat-label">STT API Costs</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="overview" class="section">
+            <div class="container">
+                <h2>How It Works</h2>
+                <div class="timeline">
+                    <div class="timeline-item">
+                        <h3>Audio Capture</h3>
+                        <p>Continuous microphone recording with voice activity detection</p>
+                    </div>
+                    <div class="timeline-item">
+                        <h3>Speech-to-Text</h3>
+                        <p>Local Whisper processing for complete privacy</p>
+                    </div>
+                    <div class="timeline-item">
+                        <h3>Task Extraction</h3>
+                        <p>AI-powered analysis to identify action items and ideas</p>
+                    </div>
+                    <div class="timeline-item">
+                        <h3>Action & Integration</h3>
+                        <p>Automatic task management and system integration</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="architecture" class="section">
+            <div class="container">
+                <h2>Architecture Options</h2>
+                <div class="architecture-cards">
+                    <div class="card">
+                        <h3>🚀 Minimal Prototype</h3>
+                        <p>Get started in 1-2 hours with basic functionality</p>
+                        
+                        <h4>Hardware</h4>
+                        <ul>
+                            <li>Raspberry Pi 4B or existing computer</li>
+                            <li>USB microphone</li>
+                            <li>32GB+ storage</li>
+                        </ul>
+                        
+                        <h4>Software Stack</h4>
+                        <ul>
+                            <li>Python + PyAudio for capture</li>
+                            <li>OpenAI Whisper (open-source, local)</li>
+                            <li>Claude API for tasks</li>
+                            <li>Simple file-based storage</li>
+                        </ul>
+                        
+                        <h4>Best For</h4>
+                        <ul>
+                            <li>Proof of concept</li>
+                            <li>Personal experimentation</li>
+                            <li>Learning the system</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="card">
+                        <h3>🔒 Secure Production</h3>
+                        <p>Enterprise-ready with full security features</p>
+                        
+                        <h4>Infrastructure</h4>
+                        <ul>
+                            <li>Self-hosted server</li>
+                            <li>Wearable capture device</li>
+                            <li>Encrypted storage</li>
+                        </ul>
+                        
+                        <h4>Security Features</h4>
+                        <ul>
+                            <li>End-to-end encryption</li>
+                            <li>Zero-knowledge architecture</li>
+                            <li>VPN tunnel communication</li>
+                            <li>Automatic data deletion</li>
+                        </ul>
+                        
+                        <h4>Best For</h4>
+                        <ul>
+                            <li>Production deployment</li>
+                            <li>Sensitive environments</li>
+                            <li>Team collaboration</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="diagram">
+                    <h3>Decoupled Architecture - Device to Processing</h3>
+                    <pre>
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│                            CAPTURE DEVICE                                       │
+│  ┌─────────────┐    ┌─────────────┐    ┌─────────────┐    ┌─────────────┐      │
+│  │ Microphone  │───▶│ Audio Buffer│───▶│ VAD Filter  │───▶│ File Queue  │      │
+│  │ (Always On) │    │ (30s chunks)│    │ (Speech     │    │ (.wav files)│      │
+│  └─────────────┘    └─────────────┘    │ Detection)  │    └─────────────┘      │
+│                                        └─────────────┘           │              │
+└────────────────────────────────────────────────────────────────│──────────────┘
+                                                                  │
+                                    ┌─────────────────────────────┼─────────────────────────────┐
+                                    │             SHARED STORAGE / QUEUE                        │
+                                    │  ┌─────────────┐    ┌─────────────┐    ┌─────────────┐    │
+                                    │  │ Raw Audio   │    │ Processing  │    │ Transcripts │    │
+                                    │  │ Files       │───▶│ Queue       │───▶│ Queue       │    │
+                                    │  │ (encrypted) │    │ (FIFO)      │    │ (JSON)      │    │
+                                    │  └─────────────┘    └─────────────┘    └─────────────┘    │
+                                    └─────────────────────────────────────────│──────────────────┘
+                                                                              │
+┌─────────────────────────────────────────────────────────────────────────────────┤
+│                         PROCESSING COMPUTER                                     │
+│  ┌─────────────┐    ┌─────────────┐    ┌─────────────┐    ┌─────────────┐      │
+│  │ File Poller │───▶│ Whisper STT │───▶│ Claude API  │───▶│ Task System │      │
+│  │ (every 30s) │    │ (Local)     │    │ (Extraction)│    │ (Storage)   │      │
+│  └─────────────┘    └─────────────┘    └─────────────┘    └─────────────┘      │
+└─────────────────────────────────────────────────────────────────────────────────┘
+                    </pre>
+                </div>
+
+                <div class="diagram">
+                    <h3>Data Models & Flow</h3>
+                    <pre>
+INPUT: Audio Segments
+├── filename: "segment_20240107_143022.wav"
+├── duration: 30.0 seconds
+├── sample_rate: 16000 Hz
+├── channels: 1 (mono)
+├── format: WAV/PCM
+└── metadata: {timestamp, device_id, encryption_key}
+
+PROCESSING QUEUE:
+├── status: "pending" | "processing" | "completed" | "failed"
+├── priority: 1-10 (speech detected = higher priority)
+├── retry_count: 0-3
+└── created_at: ISO timestamp
+
+TRANSCRIPT OUTPUT:
+{
+  "id": "uuid-4",
+  "source_file": "segment_20240107_143022.wav",
+  "timestamp": "2024-01-07T14:30:22.000Z",
+  "duration": 30.0,
+  "language": "en",
+  "confidence": 0.89,
+  "text": "Hey, remind me to call Sarah about the project meeting tomorrow at 3pm",
+  "segments": [
+    {
+      "start": 0.0,
+      "end": 5.2,
+      "text": "Hey, remind me to call Sarah",
+      "confidence": 0.92
+    },
+    {
+      "start": 5.2,
+      "end": 10.8,
+      "text": "about the project meeting tomorrow at 3pm",
+      "confidence": 0.86
+    }
+  ]
+}
+
+EXTRACTED TASKS:
+{
+  "id": "uuid-5",
+  "source_transcript": "uuid-4",
+  "extracted_at": "2024-01-07T14:30:35.000Z",
+  "tasks": [
+    {
+      "type": "reminder",
+      "content": "Call Sarah about project meeting",
+      "priority": "high",
+      "deadline": "2024-01-08T15:00:00.000Z",
+      "status": "pending",
+      "confidence": 0.95,
+      "entities": {
+        "person": "Sarah",
+        "action": "call",
+        "topic": "project meeting",
+        "datetime": "tomorrow at 3pm"
+      }
+    }
+  ]
+}
+                    </pre>
+                </div>
+            </div>
+        </section>
+
+        <section id="implementation" class="section">
+            <div class="container">
+                <h2>Implementation Guide</h2>
+                
+                <div class="tabs">
+                    <button class="tab active" onclick="showTab('quickstart')">Quick Start</button>
+                    <button class="tab" onclick="showTab('audio')">Audio Capture</button>
+                    <button class="tab" onclick="showTab('stt')">Speech-to-Text</button>
+                    <button class="tab" onclick="showTab('tasks')">Task Processing</button>
+                </div>
+
+                <div id="quickstart" class="tab-content active">
+                    <h3>Get Started in Minutes</h3>
+                    <div class="code-block">
+                        <pre># Clone the repository
+git clone https://github.com/yourusername/mike_logger
+cd mike_logger
+
+# Create virtual environment
+python -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+
+# Install dependencies
+pip install whisper pyaudio anthropic python-dotenv
+
+# Configure API key
+echo "ANTHROPIC_API_KEY=your_key_here" > .env
+
+# Run the system
+python src/main.py</pre>
+                    </div>
+                </div>
+
+                <div id="audio" class="tab-content">
+                    <h3>Audio Capture Module</h3>
+                    <div class="code-block">
+                        <pre>import pyaudio
+import wave
+import threading
+import queue
+
+class AudioCapture:
+    def __init__(self, chunk_size=1024, sample_rate=16000):
+        self.chunk_size = chunk_size
+        self.sample_rate = sample_rate
+        self.audio_queue = queue.Queue()
+        
+    def start_recording(self):
+        """Start continuous audio recording"""
+        # Implementation details...</pre>
+                    </div>
+                </div>
+
+                <div id="stt" class="tab-content">
+                    <h3>Speech-to-Text with Whisper</h3>
+                    <div class="code-block">
+                        <pre>import whisper
+
+class SpeechToText:
+    def __init__(self, model_size="base"):
+        self.model = whisper.load_model(model_size)
+        
+    def transcribe_file(self, audio_file):
+        """Transcribe audio to text"""
+        result = self.model.transcribe(audio_file)
+        return result["text"]</pre>
+                    </div>
+                </div>
+
+                <div id="tasks" class="tab-content">
+                    <h3>Task Extraction with Claude</h3>
+                    <div class="code-block">
+                        <pre>from anthropic import Anthropic
+
+class TaskProcessor:
+    def __init__(self):
+        self.client = Anthropic()
+        
+    def extract_tasks(self, transcript):
+        """Extract actionable items from transcript"""
+        # AI-powered task extraction...</pre>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="section">
+            <div class="container">
+                <h2>Key Features</h2>
+                <div class="feature-grid">
+                    <div class="feature">
+                        <div class="feature-icon">🔐</div>
+                        <h3>Complete Privacy</h3>
+                        <p>All processing happens on your infrastructure. Whisper runs locally, only Claude API calls go to the cloud.</p>
+                    </div>
+                    <div class="feature">
+                        <div class="feature-icon">🎯</div>
+                        <h3>Smart Processing</h3>
+                        <p>Voice Activity Detection ensures efficient processing of actual speech, not silence.</p>
+                    </div>
+                    <div class="feature">
+                        <div class="feature-icon">⚡</div>
+                        <h3>Real-time Analysis</h3>
+                        <p>Process conversations as they happen with &lt;10 second end-to-end latency.</p>
+                    </div>
+                    <div class="feature">
+                        <div class="feature-icon">🔄</div>
+                        <h3>Continuous Learning</h3>
+                        <p>System improves over time by learning your speech patterns and common tasks.</p>
+                    </div>
+                    <div class="feature">
+                        <div class="feature-icon">🛠️</div>
+                        <h3>Hackable Design</h3>
+                        <p>Open architecture allows easy customization and integration with your tools.</p>
+                    </div>
+                    <div class="feature">
+                        <div class="feature-icon">📱</div>
+                        <h3>Multiple Inputs</h3>
+                        <p>Support for wearables, phones, or dedicated recording devices.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="security" class="section">
+            <div class="container">
+                <h2>Security & Privacy</h2>
+                <div class="card">
+                    <h3>Privacy First Design</h3>
+                    <ul>
+                        <li>No audio leaves your controlled infrastructure</li>
+                        <li>Automatic data deletion after processing</li>
+                        <li>Zero-knowledge server architecture</li>
+                        <li>Device-specific encryption keys</li>
+                        <li>No third-party analytics or tracking</li>
+                    </ul>
+                    
+                    <h3>Compliance Ready</h3>
+                    <ul>
+                        <li>GDPR-compliant data handling</li>
+                        <li>Configurable retention policies</li>
+                        <li>Full audit logging</li>
+                        <li>User consent management</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <section id="getting-started" class="section">
+            <div class="container">
+                <h2>Getting Started</h2>
+                <div class="timeline">
+                    <div class="timeline-item">
+                        <h3>1. Choose Your Architecture</h3>
+                        <p>Start with the minimal prototype for testing, or jump straight to secure production.</p>
+                    </div>
+                    <div class="timeline-item">
+                        <h3>2. Set Up Hardware</h3>
+                        <p>Raspberry Pi + USB mic, or use your existing computer to begin.</p>
+                    </div>
+                    <div class="timeline-item">
+                        <h3>3. Install Whisper</h3>
+                        <p>Download and configure OpenAI's Whisper for local speech-to-text.</p>
+                    </div>
+                    <div class="timeline-item">
+                        <h3>4. Configure Claude API</h3>
+                        <p>Set up your Anthropic API key for intelligent task extraction.</p>
+                    </div>
+                    <div class="timeline-item">
+                        <h3>5. Start Recording</h3>
+                        <p>Run the system and watch as your conversations become actionable tasks!</p>
+                    </div>
+                </div>
+                
+                <div style="text-align: center; margin-top: 3rem; padding-top: 2rem; border-top: 1px solid var(--border);">
+                    <a href="setup-guide.html" style="background: var(--primary); color: white; padding: 1rem 2rem; border-radius: 8px; text-decoration: none; font-weight: 600; display: inline-block; font-size: 1.1rem;">
+                        📋 Complete Setup Guide - Get Started Now →
+                    </a>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        function showTab(tabName) {
+            // Hide all tab contents
+            const contents = document.querySelectorAll('.tab-content');
+            contents.forEach(content => content.classList.remove('active'));
+            
+            // Remove active class from all tabs
+            const tabs = document.querySelectorAll('.tab');
+            tabs.forEach(tab => tab.classList.remove('active'));
+            
+            // Show selected tab content
+            document.getElementById(tabName).classList.add('active');
+            
+            // Add active class to clicked tab
+            event.target.classList.add('active');
+        }
+
+        // Smooth scrolling for navigation links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+</html>

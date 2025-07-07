@@ -1,0 +1,1504 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mike Logger - Complete Setup Guide</title>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --secondary: #1e40af;
+            --accent: #3b82f6;
+            --bg: #f8fafc;
+            --card-bg: #ffffff;
+            --text: #334155;
+            --text-light: #64748b;
+            --border: #e2e8f0;
+            --code-bg: #f1f5f9;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --error: #ef4444;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        h1 {
+            color: var(--primary);
+            margin-bottom: 2rem;
+            font-size: 2.5rem;
+        }
+
+        h2 {
+            color: var(--primary);
+            margin: 3rem 0 1.5rem;
+            font-size: 2rem;
+            border-bottom: 2px solid var(--border);
+            padding-bottom: 0.5rem;
+        }
+
+        h3 {
+            color: var(--secondary);
+            margin: 2rem 0 1rem;
+            font-size: 1.5rem;
+        }
+
+        .alert {
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            margin: 1rem 0;
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+        }
+
+        .alert-info {
+            background: #dbeafe;
+            border: 1px solid #60a5fa;
+            color: #1e40af;
+        }
+
+        .alert-warning {
+            background: #fef3c7;
+            border: 1px solid #fbbf24;
+            color: #92400e;
+        }
+
+        .alert-success {
+            background: #d1fae5;
+            border: 1px solid #34d399;
+            color: #065f46;
+        }
+
+        .alert-icon {
+            font-size: 1.2rem;
+            flex-shrink: 0;
+        }
+
+        .code-block {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 1.5rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 1rem 0;
+            position: relative;
+        }
+
+        .code-block pre {
+            margin: 0;
+            font-family: 'Fira Code', 'Courier New', monospace;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+
+        .copy-button {
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+            background: var(--accent);
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.875rem;
+        }
+
+        .copy-button:hover {
+            background: var(--primary);
+        }
+
+        .step {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 2rem;
+            margin: 2rem 0;
+            position: relative;
+        }
+
+        .step-number {
+            position: absolute;
+            top: -1rem;
+            left: 1rem;
+            background: var(--primary);
+            color: white;
+            width: 2rem;
+            height: 2rem;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            border-bottom: 2px solid var(--border);
+        }
+
+        .tab {
+            padding: 0.75rem 1.5rem;
+            background: none;
+            border: none;
+            font-size: 1rem;
+            cursor: pointer;
+            color: var(--text-light);
+            transition: all 0.2s;
+            position: relative;
+            border-radius: 4px 4px 0 0;
+        }
+
+        .tab:hover {
+            background: var(--bg);
+        }
+
+        .tab.active {
+            color: var(--primary);
+            background: var(--card-bg);
+        }
+
+        .tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: var(--primary);
+        }
+
+        .tab-content {
+            display: none;
+            background: var(--card-bg);
+            padding: 1.5rem;
+            border-radius: 0 8px 8px 8px;
+            border: 1px solid var(--border);
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .requirements {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+
+        .requirement {
+            background: var(--bg);
+            padding: 1rem;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+        }
+
+        .requirement h4 {
+            color: var(--secondary);
+            margin-bottom: 0.5rem;
+        }
+
+        .requirement ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .requirement li {
+            padding: 0.25rem 0;
+            color: var(--text-light);
+        }
+
+        .requirement li:before {
+            content: "• ";
+            color: var(--accent);
+            font-weight: bold;
+        }
+
+        .diagram {
+            background: var(--code-bg);
+            border-radius: 8px;
+            padding: 2rem;
+            margin: 2rem 0;
+            overflow-x: auto;
+        }
+
+        .diagram pre {
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            line-height: 1.4;
+            margin: 0;
+        }
+
+        .checklist {
+            background: var(--bg);
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin: 1rem 0;
+        }
+
+        .checklist-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.5rem 0;
+        }
+
+        .checklist-item input[type="checkbox"] {
+            width: 1.2rem;
+            height: 1.2rem;
+            cursor: pointer;
+        }
+
+        .checklist-item label {
+            cursor: pointer;
+            flex: 1;
+        }
+
+        .checklist-item.checked label {
+            text-decoration: line-through;
+            color: var(--text-light);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+        }
+
+        th, td {
+            text-align: left;
+            padding: 0.75rem;
+            border: 1px solid var(--border);
+        }
+
+        th {
+            background: var(--bg);
+            font-weight: 600;
+            color: var(--secondary);
+        }
+
+        tr:hover {
+            background: var(--bg);
+        }
+
+        .navigation {
+            display: flex;
+            justify-content: space-between;
+            margin: 3rem 0;
+            padding-top: 2rem;
+            border-top: 1px solid var(--border);
+        }
+
+        .nav-button {
+            padding: 0.75rem 1.5rem;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: background 0.2s;
+        }
+
+        .nav-button:hover {
+            background: var(--secondary);
+        }
+
+        .nav-button.secondary {
+            background: var(--bg);
+            color: var(--primary);
+            border: 1px solid var(--primary);
+        }
+
+        .nav-button.secondary:hover {
+            background: var(--primary);
+            color: white;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+
+            h1 {
+                font-size: 2rem;
+            }
+
+            .requirements {
+                grid-template-columns: 1fr;
+            }
+
+            .tabs {
+                flex-wrap: wrap;
+            }
+
+            .tab {
+                font-size: 0.875rem;
+                padding: 0.5rem 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎤 Mike Logger Complete Setup Guide</h1>
+        
+        <div class="alert alert-info">
+            <span class="alert-icon">ℹ️</span>
+            <div>
+                <strong>Estimated Setup Time:</strong> 30-60 minutes for basic setup, 2-4 hours for full production deployment
+            </div>
+        </div>
+
+        <h2>Quick Start Options</h2>
+        
+        <div class="tabs">
+            <button class="tab active" onclick="showTab('docker')">Docker Setup (Recommended)</button>
+            <button class="tab" onclick="showTab('minimal')">Minimal Setup (Testing)</button>
+            <button class="tab" onclick="showTab('standard')">Standard Setup (Daily Use)</button>
+            <button class="tab" onclick="showTab('production')">Production Setup (Secure)</button>
+        </div>
+
+        <div id="docker" class="tab-content active">
+            <h3>Docker Setup - Cross-Platform & Reliable (Recommended)</h3>
+            <p>Uses Docker for processing while audio capture runs natively on your Mac. Best for consistency across platforms.</p>
+            
+            <div class="alert alert-info">
+                <span class="alert-icon">🐳</span>
+                <div>
+                    <strong>Hybrid Architecture:</strong> Audio capture runs on your Mac (accessing microphone), while processing runs in Docker containers for consistency and isolation.
+                </div>
+            </div>
+            
+            <div class="requirements">
+                <div class="requirement">
+                    <h4>Prerequisites</h4>
+                    <ul>
+                        <li>Docker Desktop for Mac</li>
+                        <li>Docker Compose</li>
+                        <li>Python 3.8+ (for audio capture)</li>
+                        <li>8GB+ RAM recommended</li>
+                    </ul>
+                </div>
+                <div class="requirement">
+                    <h4>Architecture</h4>
+                    <ul>
+                        <li>Audio capture: Native Mac script</li>
+                        <li>Processing: Docker containers</li>
+                        <li>Communication: Shared volumes</li>
+                        <li>Monitoring: Web dashboard</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="diagram">
+                <h4>Docker Architecture on Mac</h4>
+                <pre>
+┌─────────────────────────────────────────────────────────────────────────┐
+│                           macOS HOST                                    │
+│                                                                         │
+│  ┌─────────────────┐                    ┌─────────────────┐             │
+│  │ Audio Capture   │────────────────────│ Shared Volume   │             │
+│  │ (Native Python) │   .wav files       │ ./data/audio/   │             │
+│  └─────────────────┘                    └─────────────────┘             │
+│                                                │                        │
+└─────────────────────────────────────────────────┼────────────────────────┘
+                                                  │
+┌─────────────────────────────────────────────────┼────────────────────────┐
+│                       DOCKER CONTAINERS        │                        │
+│                                                │                        │
+│  ┌─────────────────┐    ┌─────────────────┐    │    ┌─────────────────┐  │
+│  │ Whisper STT     │────│ Claude API      │────┼────│ Task Storage    │  │
+│  │ Container       │    │ Processor       │    │    │ Container       │  │
+│  └─────────────────┘    └─────────────────┘    │    └─────────────────┘  │
+│                                                │                        │
+│  ┌─────────────────┐    ┌─────────────────┐    │    ┌─────────────────┐  │
+│  │ Redis Queue     │────│ Web Dashboard   │────┼────│ Monitoring      │  │
+│  │ Container       │    │ Container       │    │    │ (Prometheus)    │  │
+│  └─────────────────┘    └─────────────────┘    │    └─────────────────┘  │
+└─────────────────────────────────────────────────┼────────────────────────┘
+                                                  │
+                              Shared Volumes: ./data/transcripts/
+                                              ./data/tasks/
+                                              ./logs/
+                </pre>
+            </div>
+        </div>
+
+        <div id="minimal" class="tab-content">
+            <h3>Minimal Setup - Get Running in 30 Minutes</h3>
+            <p>Perfect for testing the concept with your existing computer.</p>
+            
+            <div class="requirements">
+                <div class="requirement">
+                    <h4>Hardware Needed</h4>
+                    <ul>
+                        <li>Your laptop/desktop</li>
+                        <li>Built-in or USB microphone</li>
+                        <li>4GB+ RAM</li>
+                        <li>10GB free disk space</li>
+                    </ul>
+                </div>
+                <div class="requirement">
+                    <h4>Software Requirements</h4>
+                    <ul>
+                        <li>Python 3.8-3.11</li>
+                        <li>Git</li>
+                        <li>Text editor</li>
+                        <li>Claude API key</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div id="standard" class="tab-content">
+            <h3>Standard Setup - For Daily Use</h3>
+            <p>Includes wearable device and cloud storage for practical everyday use.</p>
+            
+            <div class="requirements">
+                <div class="requirement">
+                    <h4>Hardware Needed</h4>
+                    <ul>
+                        <li>Raspberry Pi 4 or phone</li>
+                        <li>Quality USB microphone</li>
+                        <li>Processing computer</li>
+                        <li>Cloud storage account</li>
+                    </ul>
+                </div>
+                <div class="requirement">
+                    <h4>Additional Setup</h4>
+                    <ul>
+                        <li>Dropbox/Google Drive</li>
+                        <li>Background services</li>
+                        <li>Auto-start scripts</li>
+                        <li>Basic monitoring</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div id="production" class="tab-content">
+            <h3>Production Setup - Enterprise Ready</h3>
+            <p>Full security, encryption, and reliability for sensitive environments.</p>
+            
+            <div class="requirements">
+                <div class="requirement">
+                    <h4>Infrastructure</h4>
+                    <ul>
+                        <li>Dedicated capture device</li>
+                        <li>VPS or private server</li>
+                        <li>Encrypted storage</li>
+                        <li>VPN tunnel</li>
+                    </ul>
+                </div>
+                <div class="requirement">
+                    <h4>Security Features</h4>
+                    <ul>
+                        <li>End-to-end encryption</li>
+                        <li>Certificate auth</li>
+                        <li>Audit logging</li>
+                        <li>Data retention policies</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <h2>Step-by-Step Installation</h2>
+
+        <div class="step">
+            <div class="step-number">1</div>
+            <h3>Install System Dependencies</h3>
+            
+            <h4>macOS</h4>
+            <div class="code-block">
+                <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                <pre># Install Homebrew if not already installed
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+
+# Install Python and dependencies
+brew install python@3.11 portaudio ffmpeg git
+
+# Verify installations
+python3 --version
+ffmpeg -version</pre>
+            </div>
+
+            <h4>Ubuntu/Debian</h4>
+            <div class="code-block">
+                <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                <pre># Update package list
+sudo apt update
+
+# Install dependencies
+sudo apt install -y python3.11 python3-pip portaudio19-dev ffmpeg git
+
+# Verify installations
+python3 --version
+ffmpeg -version</pre>
+            </div>
+
+            <h4>Windows</h4>
+            <div class="code-block">
+                <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                <pre># Install Python from python.org (3.8-3.11)
+# Install Git from git-scm.com
+# Install ffmpeg from ffmpeg.org
+
+# Open PowerShell as Administrator and verify
+python --version
+git --version
+ffmpeg -version</pre>
+            </div>
+        </div>
+
+        <div class="step">
+            <div class="step-number">2</div>
+            <h3>Clone and Set Up Repository</h3>
+            
+            <div class="code-block">
+                <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                <pre># Clone the repository
+git clone https://github.com/yourusername/mike_logger.git
+cd mike_logger
+
+# Create virtual environment
+python3 -m venv venv
+
+# Activate virtual environment
+# On macOS/Linux:
+source venv/bin/activate
+# On Windows:
+# venv\Scripts\activate
+
+# Upgrade pip
+pip install --upgrade pip</pre>
+            </div>
+        </div>
+
+        <div class="step">
+            <div class="step-number">3</div>
+            <h3>Install Python Dependencies</h3>
+            
+            <div class="code-block">
+                <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                <pre># Install Whisper and dependencies
+pip install git+https://github.com/openai/whisper.git
+pip install pyaudio numpy scipy
+pip install anthropic python-dotenv
+pip install webrtcvad librosa soundfile
+
+# For production features
+pip install cryptography redis boto3
+pip install flask gunicorn
+pip install prometheus-client</pre>
+            </div>
+
+            <div class="alert alert-warning">
+                <span class="alert-icon">⚠️</span>
+                <div>
+                    <strong>PyAudio Installation Issues?</strong><br>
+                    On macOS: <code>brew install portaudio</code> first<br>
+                    On Windows: Download wheel from https://www.lfd.uci.edu/~gohlke/pythonlibs/#pyaudio
+                </div>
+            </div>
+        </div>
+
+        <div class="step">
+            <div class="step-number">4</div>
+            <h3>Download Whisper Model</h3>
+            
+            <div class="code-block">
+                <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                <pre># Test Whisper installation and download model
+python3 -c "import whisper; model = whisper.load_model('base'); print('Whisper base model loaded successfully!')"
+
+# This will download the model (~150MB) to ~/.cache/whisper/
+# Available models: tiny, base, small, medium, large, large-v3</pre>
+            </div>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Model</th>
+                        <th>Size</th>
+                        <th>VRAM</th>
+                        <th>Speed</th>
+                        <th>Accuracy</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>tiny</td>
+                        <td>39 MB</td>
+                        <td>~1 GB</td>
+                        <td>~32x</td>
+                        <td>Good</td>
+                    </tr>
+                    <tr>
+                        <td>base</td>
+                        <td>74 MB</td>
+                        <td>~1 GB</td>
+                        <td>~16x</td>
+                        <td>Better</td>
+                    </tr>
+                    <tr>
+                        <td>small</td>
+                        <td>244 MB</td>
+                        <td>~2 GB</td>
+                        <td>~6x</td>
+                        <td>Great</td>
+                    </tr>
+                    <tr>
+                        <td>medium</td>
+                        <td>769 MB</td>
+                        <td>~5 GB</td>
+                        <td>~2x</td>
+                        <td>Excellent</td>
+                    </tr>
+                    <tr>
+                        <td>large-v3</td>
+                        <td>1550 MB</td>
+                        <td>~10 GB</td>
+                        <td>~1x</td>
+                        <td>Best</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="step">
+            <div class="step-number">5</div>
+            <h3>Configure API Keys and Settings</h3>
+            
+            <div class="code-block">
+                <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                <pre># Create .env file
+cat > .env << EOF
+# Claude API Configuration
+ANTHROPIC_API_KEY=your_claude_api_key_here
+
+# Audio Configuration
+SAMPLE_RATE=16000
+CHANNELS=1
+CHUNK_DURATION=0.5  # seconds
+
+# Whisper Configuration
+WHISPER_MODEL=base
+WHISPER_LANGUAGE=en
+
+# Processing Configuration
+VAD_AGGRESSIVENESS=2  # 0-3, higher = more aggressive
+SILENCE_THRESHOLD=2.0  # seconds of silence before segmenting
+SPEECH_PAD_MS=300  # milliseconds to pad speech segments
+
+# Storage Configuration
+AUDIO_RETENTION_HOURS=24
+TRANSCRIPT_RETENTION_DAYS=30
+TASK_RETENTION_DAYS=365
+
+# Optional: Cloud Storage
+# DROPBOX_TOKEN=your_token
+# AWS_ACCESS_KEY_ID=your_key
+# AWS_SECRET_ACCESS_KEY=your_secret
+EOF</pre>
+            </div>
+
+            <div class="alert alert-info">
+                <span class="alert-icon">ℹ️</span>
+                <div>
+                    Get your Claude API key from <a href="https://console.anthropic.com/" target="_blank">console.anthropic.com</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="step">
+            <div class="step-number">6</div>
+            <h3>Docker Setup Steps</h3>
+            
+            <div class="alert alert-info">
+                <span class="alert-icon">🐳</span>
+                <div>
+                    <strong>Docker-First Approach:</strong> These steps set up the hybrid Docker architecture for cross-platform consistency.
+                </div>
+            </div>
+
+            <h4>Step 6.1: Install Docker Desktop</h4>
+            <div class="code-block">
+                <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                <pre># Download Docker Desktop for Mac from docker.com
+# Install and start Docker Desktop
+
+# Verify installation
+docker --version
+docker-compose --version
+
+# Test Docker is running
+docker run hello-world</pre>
+            </div>
+
+            <h4>Step 6.2: Create Environment File</h4>
+            <div class="code-block">
+                <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                <pre># Create .env file for Docker Compose
+cat > .env << EOF
+# Claude API Configuration
+ANTHROPIC_API_KEY=your_claude_api_key_here
+
+# Whisper Configuration
+WHISPER_MODEL=base
+WHISPER_LANGUAGE=en
+
+# Processing Configuration
+PROCESSING_INTERVAL=30
+LOG_LEVEL=INFO
+
+# Optional: Flask Dashboard
+FLASK_ENV=production
+
+# Resources
+MEMORY_LIMIT=4G
+CPU_LIMIT=2
+EOF</pre>
+            </div>
+
+            <h4>Step 6.3: Build and Start Services</h4>
+            <div class="code-block">
+                <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                <pre># Build all services
+docker-compose build
+
+# Start core services
+docker-compose up -d processor redis
+
+# Check services are running
+docker-compose ps
+
+# View logs
+docker-compose logs processor</pre>
+            </div>
+
+            <h4>Step 6.4: Start Optional Services</h4>
+            <div class="code-block">
+                <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                <pre># Start web dashboard (optional)
+docker-compose up -d dashboard
+
+# Start monitoring (optional)
+docker-compose up -d prometheus
+
+# View dashboard at http://localhost:8080
+# View metrics at http://localhost:9090
+
+# Check all services
+docker-compose ps</pre>
+            </div>
+
+            <h4>Step 6.5: Set Up Native Audio Capture</h4>
+            <div class="code-block">
+                <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                <pre># Install Python dependencies for audio capture (on Mac host)
+pip3 install pyaudio numpy webrtcvad soundfile
+
+# Create native audio capture script
+cat > host_audio_capture.py << 'EOF'
+#!/usr/bin/env python3
+"""
+Native audio capture for Mac host.
+Saves audio files to shared volume for Docker processing.
+"""
+import pyaudio
+import webrtcvad
+import wave
+import time
+import os
+from datetime import datetime
+import numpy as np
+
+class HostAudioCapture:
+    def __init__(self):
+        self.sample_rate = 16000
+        self.chunk_size = 1024
+        self.vad = webrtcvad.Vad(2)
+        
+        # Ensure output directory exists
+        os.makedirs("data/audio", exist_ok=True)
+        
+    def start_capture(self):
+        """Start continuous audio capture"""
+        p = pyaudio.PyAudio()
+        
+        stream = p.open(
+            format=pyaudio.paInt16,
+            channels=1,
+            rate=self.sample_rate,
+            input=True,
+            frames_per_buffer=self.chunk_size
+        )
+        
+        print("🎤 Starting audio capture...")
+        print("   Files will be saved to ./data/audio/")
+        print("   Docker containers will process them automatically")
+        print("   Press Ctrl+C to stop")
+        
+        try:
+            segment_frames = []
+            segment_start = time.time()
+            
+            while True:
+                data = stream.read(self.chunk_size)
+                segment_frames.append(data)
+                
+                # Save segment every 30 seconds or on silence
+                if time.time() - segment_start >= 30:
+                    self.save_segment(segment_frames)
+                    segment_frames = []
+                    segment_start = time.time()
+                    
+        except KeyboardInterrupt:
+            print("\n🛑 Stopping audio capture...")
+        finally:
+            stream.stop_stream()
+            stream.close()
+            p.terminate()
+            
+            # Save any remaining audio
+            if segment_frames:
+                self.save_segment(segment_frames)
+    
+    def save_segment(self, frames):
+        """Save audio segment to shared volume"""
+        if not frames:
+            return
+            
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S_%f")[:-3]
+        filename = f"data/audio/segment_{timestamp}.wav"
+        
+        # Write WAV file
+        with wave.open(filename, 'wb') as wf:
+            wf.setnchannels(1)
+            wf.setsampwidth(2)  # 2 bytes = 16 bit
+            wf.setframerate(self.sample_rate)
+            wf.writeframes(b''.join(frames))
+        
+        print(f"📁 Saved: {filename}")
+
+if __name__ == "__main__":
+    capture = HostAudioCapture()
+    capture.start_capture()
+EOF
+
+# Make it executable
+chmod +x host_audio_capture.py</pre>
+            </div>
+
+            <div class="alert alert-success">
+                <span class="alert-icon">✅</span>
+                <div>
+                    <strong>Docker Setup Complete!</strong> You now have:
+                    <ul style="margin-top: 0.5rem;">
+                        <li>• Processing containers running in Docker</li>
+                        <li>• Native audio capture on Mac</li>
+                        <li>• Shared volumes for communication</li>
+                        <li>• Web dashboard (optional)</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="step">
+            <div class="step-number">7</div>
+            <h3>Test the Complete System</h3>
+            
+            <div class="code-block">
+                <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                <pre># In one terminal: Start audio capture on Mac
+python3 host_audio_capture.py
+
+# In another terminal: Monitor Docker processing
+docker-compose logs -f processor
+
+# Optional: Check dashboard
+open http://localhost:8080
+
+# Test with a voice recording
+# Say: "Remind me to call Sarah about the project meeting tomorrow"
+# Check if files appear in data/audio/ and get processed</pre>
+            </div>
+
+            <h4>Verify Everything is Working</h4>
+            <div class="checklist">
+                <div class="checklist-item">
+                    <input type="checkbox" id="docker-check1">
+                    <label for="docker-check1">Docker containers running: <code>docker-compose ps</code></label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="docker-check2">
+                    <label for="docker-check2">Audio files appearing in <code>./data/audio/</code></label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="docker-check3">
+                    <label for="docker-check3">Processor logs show Whisper transcription</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="docker-check4">
+                    <label for="docker-check4">Transcripts created in <code>./data/transcripts/</code></label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="docker-check5">
+                    <label for="docker-check5">Tasks extracted in <code>./data/tasks/</code></label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="docker-check6">
+                    <label for="docker-check6">Dashboard accessible at http://localhost:8080</label>
+                </div>
+            </div>
+        </div>
+
+        <div class="step">
+            <div class="step-number">8</div>
+            <h3>Test Audio Capture (Non-Docker Setup)</h3>
+            
+            <div class="code-block">
+                <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                <pre># Create test script
+cat > test_audio.py << 'EOF'
+import pyaudio
+import numpy as np
+
+def test_microphone():
+    p = pyaudio.PyAudio()
+    
+    # List audio devices
+    print("Available audio devices:")
+    for i in range(p.get_device_count()):
+        info = p.get_device_info_by_index(i)
+        if info['maxInputChannels'] > 0:
+            print(f"  [{i}] {info['name']}")
+    
+    # Test recording
+    stream = p.open(format=pyaudio.paInt16,
+                    channels=1,
+                    rate=16000,
+                    input=True,
+                    frames_per_buffer=1024)
+    
+    print("\nRecording for 3 seconds... Speak now!")
+    frames = []
+    for _ in range(0, int(16000 / 1024 * 3)):
+        data = stream.read(1024)
+        frames.append(data)
+        
+        # Show volume level
+        audio_data = np.frombuffer(data, dtype=np.int16)
+        volume = np.abs(audio_data).mean()
+        bar = "█" * int(volume / 100)
+        print(f"\rVolume: {bar:<50}", end="")
+    
+    stream.stop_stream()
+    stream.close()
+    p.terminate()
+    
+    print("\n\nRecording complete!")
+
+if __name__ == "__main__":
+    test_microphone()
+EOF
+
+# Run the test
+python test_audio.py</pre>
+            </div>
+        </div>
+
+        <h2>Intelligent Audio Segmentation</h2>
+
+        <div class="alert alert-info">
+            <span class="alert-icon">💡</span>
+            <div>
+                <strong>Smart Segmentation:</strong> Instead of fixed 30-second chunks, Mike Logger uses intelligent segmentation based on speech patterns, silence detection, and natural pauses.
+            </div>
+        </div>
+
+        <div class="diagram">
+            <h3>Segmentation Strategies</h3>
+            <pre>
+┌─────────────────────────────────────────────────────────────────────────┐
+│                     INTELLIGENT AUDIO SEGMENTATION                      │
+├─────────────────────────────────────────────────────────────────────────┤
+│                                                                         │
+│  1. Voice Activity Detection (VAD)                                      │
+│     ├─ Detect speech vs silence in real-time                          │
+│     ├─ Buffer speech with padding (300ms before/after)                │
+│     └─ Trigger segmentation on extended silence (2+ seconds)          │
+│                                                                         │
+│  2. Natural Pause Detection                                             │
+│     ├─ Short pause (0.5-1s): Possible sentence boundary               │
+│     ├─ Medium pause (1-2s): Likely paragraph boundary                 │
+│     └─ Long pause (2s+): Definite segment boundary                    │
+│                                                                         │
+│  3. Acoustic Feature Analysis                                           │
+│     ├─ Pitch contour: Falling pitch = sentence end                    │
+│     ├─ Energy envelope: Decreasing energy = phrase end                │
+│     └─ Spectral features: Identify breath sounds                      │
+│                                                                         │
+│  4. Time-Based Constraints                                              │
+│     ├─ Minimum segment: 5 seconds (avoid tiny fragments)              │
+│     ├─ Maximum segment: 2 minutes (prevent huge files)                │
+│     └─ Overlap window: 500ms (ensure no lost words)                   │
+│                                                                         │
+└─────────────────────────────────────────────────────────────────────────┘</pre>
+        </div>
+
+        <div class="step">
+            <div class="step-number">7</div>
+            <h3>Implement Smart Audio Segmentation</h3>
+            
+            <div class="code-block">
+                <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                <pre># src/smart_audio_capture.py
+import collections
+import webrtcvad
+import pyaudio
+import numpy as np
+from scipy import signal
+import time
+
+class SmartAudioCapture:
+    def __init__(self):
+        self.vad = webrtcvad.Vad(2)  # Aggressiveness 0-3
+        self.sample_rate = 16000
+        self.frame_duration_ms = 30  # VAD frame size
+        self.frames_per_buffer = int(self.sample_rate * self.frame_duration_ms / 1000)
+        
+        # Segmentation parameters
+        self.min_segment_duration = 5.0  # seconds
+        self.max_segment_duration = 120.0  # seconds
+        self.silence_threshold = 1.5  # seconds to trigger split
+        self.speech_pad_ms = 300  # padding around speech
+        
+        # Ring buffer for smooth segmentation
+        self.ring_buffer = collections.deque(maxlen=int(self.silence_threshold * 1000 / self.frame_duration_ms))
+        
+    def is_speech(self, frame):
+        """Check if frame contains speech using VAD"""
+        return self.vad.is_speech(frame, self.sample_rate)
+    
+    def detect_natural_pause(self, audio_buffer):
+        """Analyze audio for natural speech boundaries"""
+        # Convert to numpy array
+        audio_data = np.frombuffer(b''.join(audio_buffer), dtype=np.int16)
+        
+        # Calculate energy envelope
+        energy = np.abs(audio_data)
+        smoothed_energy = signal.savgol_filter(energy, 1001, 3)
+        
+        # Find valleys (potential pause points)
+        valleys = signal.find_peaks(-smoothed_energy, distance=self.sample_rate//2)[0]
+        
+        # Score each valley based on:
+        # 1. Depth of energy drop
+        # 2. Duration of low energy
+        # 3. Distance from start/end
+        pause_scores = []
+        for valley in valleys:
+            if valley < len(audio_data) * 0.1 or valley > len(audio_data) * 0.9:
+                continue  # Too close to edges
+                
+            # Calculate pause metrics
+            depth = 1.0 - (smoothed_energy[valley] / np.mean(smoothed_energy))
+            duration = self._measure_pause_duration(smoothed_energy, valley)
+            
+            score = depth * duration
+            pause_scores.append((valley, score))
+        
+        # Return best pause point
+        if pause_scores:
+            best_pause = max(pause_scores, key=lambda x: x[1])
+            return best_pause[0] / self.sample_rate
+        
+        return None
+    
+    def _measure_pause_duration(self, energy, center):
+        """Measure duration of low energy around a point"""
+        threshold = np.mean(energy) * 0.3
+        
+        # Find pause boundaries
+        left = center
+        while left > 0 and energy[left] < threshold:
+            left -= 1
+            
+        right = center
+        while right < len(energy) and energy[right] < threshold:
+            right += 1
+            
+        return (right - left) / self.sample_rate
+    
+    def segment_audio_stream(self, audio_callback):
+        """Main segmentation loop with intelligent boundaries"""
+        p = pyaudio.PyAudio()
+        stream = p.open(
+            format=pyaudio.paInt16,
+            channels=1,
+            rate=self.sample_rate,
+            input=True,
+            frames_per_buffer=self.frames_per_buffer
+        )
+        
+        current_segment = []
+        segment_start_time = time.time()
+        triggered = False
+        
+        try:
+            while True:
+                frame = stream.read(self.frames_per_buffer)
+                is_speech = self.is_speech(frame)
+                
+                # Update ring buffer
+                self.ring_buffer.append(is_speech)
+                
+                # Add frame to current segment
+                current_segment.append(frame)
+                
+                # Check for segment boundaries
+                segment_duration = time.time() - segment_start_time
+                
+                # Force segmentation at max duration
+                if segment_duration >= self.max_segment_duration:
+                    self._save_segment(current_segment, audio_callback)
+                    current_segment = []
+                    segment_start_time = time.time()
+                    triggered = False
+                    
+                # Check for natural segmentation point
+                elif segment_duration >= self.min_segment_duration:
+                    # Count recent speech frames
+                    num_speech = sum(self.ring_buffer)
+                    
+                    # If mostly silence, look for natural pause
+                    if num_speech < len(self.ring_buffer) * 0.1:
+                        if not triggered:
+                            # Find best cut point
+                            pause_point = self.detect_natural_pause(current_segment[-int(self.sample_rate*2):])
+                            
+                            if pause_point:
+                                # Cut at natural pause
+                                cut_index = len(current_segment) - int((2.0 - pause_point) * self.sample_rate / self.frames_per_buffer)
+                                
+                                # Save segment up to pause
+                                self._save_segment(current_segment[:cut_index], audio_callback)
+                                
+                                # Keep remainder for next segment
+                                current_segment = current_segment[cut_index:]
+                                segment_start_time = time.time()
+                                triggered = False
+                            else:
+                                triggered = True
+                    else:
+                        triggered = False
+                        
+        finally:
+            stream.stop_stream()
+            stream.close()
+            p.terminate()
+    
+    def _save_segment(self, frames, callback):
+        """Save audio segment with metadata"""
+        if len(frames) < self.sample_rate * self.min_segment_duration / self.frames_per_buffer:
+            return  # Too short
+            
+        audio_data = b''.join(frames)
+        
+        # Calculate segment statistics
+        np_data = np.frombuffer(audio_data, dtype=np.int16)
+        
+        metadata = {
+            'duration': len(np_data) / self.sample_rate,
+            'energy_mean': float(np.mean(np.abs(np_data))),
+            'energy_std': float(np.std(np.abs(np_data))),
+            'zero_crossings': np.sum(np.diff(np.sign(np_data)) != 0),
+            'timestamp': time.time()
+        }
+        
+        callback(audio_data, metadata)</pre>
+            </div>
+
+            <div class="alert alert-success">
+                <span class="alert-icon">✅</span>
+                <div>
+                    <strong>Benefits of Smart Segmentation:</strong>
+                    <ul style="margin-top: 0.5rem;">
+                        <li>• Preserves complete thoughts and sentences</li>
+                        <li>• Reduces processing of silent periods</li>
+                        <li>• Better context for transcription accuracy</li>
+                        <li>• Natural conversation flow in transcripts</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="step">
+            <div class="step-number">8</div>
+            <h3>Run the Complete System</h3>
+            
+            <div class="code-block">
+                <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                <pre># Start Mike Logger with smart segmentation
+python src/main.py --segmentation smart
+
+# Or run with specific options
+python src/main.py \
+    --segmentation smart \
+    --whisper-model base \
+    --vad-aggressiveness 2 \
+    --min-segment 5 \
+    --max-segment 120</pre>
+            </div>
+
+            <h4>Verify Everything is Working</h4>
+            <div class="checklist">
+                <div class="checklist-item">
+                    <input type="checkbox" id="check1">
+                    <label for="check1">Audio device detected and recording</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="check2">
+                    <label for="check2">Whisper model loaded successfully</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="check3">
+                    <label for="check3">Claude API connection verified</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="check4">
+                    <label for="check4">Smart segmentation creating files</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="check5">
+                    <label for="check5">Transcripts being generated</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="check6">
+                    <label for="check6">Tasks extracted successfully</label>
+                </div>
+            </div>
+        </div>
+
+        <h2>Deployment Options</h2>
+
+        <h3>Option 1: Systemd Service (Linux)</h3>
+        <div class="code-block">
+            <button class="copy-button" onclick="copyCode(this)">Copy</button>
+            <pre># Create service file
+sudo cat > /etc/systemd/system/mike-logger.service << EOF
+[Unit]
+Description=Mike Logger Voice Assistant
+After=network.target
+
+[Service]
+Type=simple
+User=$USER
+WorkingDirectory=/home/$USER/mike_logger
+Environment="PATH=/home/$USER/mike_logger/venv/bin"
+ExecStart=/home/$USER/mike_logger/venv/bin/python src/main.py
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+# Enable and start service
+sudo systemctl enable mike-logger
+sudo systemctl start mike-logger
+sudo systemctl status mike-logger</pre>
+        </div>
+
+        <h3>Option 2: Docker Compose (Recommended for Mac)</h3>
+        <div class="code-block">
+            <button class="copy-button" onclick="copyCode(this)">Copy</button>
+            <pre># Start all services
+docker-compose up -d
+
+# Start only processing (without optional services)
+docker-compose up -d processor redis
+
+# View logs
+docker-compose logs -f
+
+# Stop all services
+docker-compose down
+
+# Restart a specific service
+docker-compose restart processor
+
+# Update services after code changes
+docker-compose build processor
+docker-compose up -d processor</pre>
+        </div>
+
+        <h3>Option 2b: Production Docker</h3>
+        <div class="code-block">
+            <button class="copy-button" onclick="copyCode(this)">Copy</button>
+            <pre># For production deployment with audio device access (Linux only)
+docker run -d \
+    --name mike-logger \
+    --device /dev/snd \
+    -v $(pwd)/data:/app/data \
+    -v $(pwd)/config:/app/config \
+    --env-file .env \
+    --restart unless-stopped \
+    mike-logger-processor</pre>
+        </div>
+
+        <h3>Option 3: Kubernetes Deployment</h3>
+        <div class="code-block">
+            <button class="copy-button" onclick="copyCode(this)">Copy</button>
+            <pre># Apply Kubernetes manifests
+kubectl apply -f k8s/namespace.yaml
+kubectl apply -f k8s/configmap.yaml
+kubectl apply -f k8s/secret.yaml
+kubectl apply -f k8s/deployment.yaml
+kubectl apply -f k8s/service.yaml</pre>
+        </div>
+
+        <h2>Troubleshooting</h2>
+
+        <h3>Common Issues and Solutions</h3>
+
+        <div class="alert alert-warning">
+            <span class="alert-icon">🔧</span>
+            <div>
+                <strong>No Audio Input Detected</strong><br>
+                • Check microphone permissions in system settings<br>
+                • Run <code>python test_audio.py</code> to list devices<br>
+                • Specify device index: <code>--audio-device 2</code>
+            </div>
+        </div>
+
+        <div class="alert alert-warning">
+            <span class="alert-icon">🔧</span>
+            <div>
+                <strong>Whisper Running Slowly</strong><br>
+                • Use smaller model: <code>--whisper-model tiny</code><br>
+                • Enable GPU: <code>pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118</code><br>
+                • Reduce sample rate: <code>--sample-rate 8000</code>
+            </div>
+        </div>
+
+        <div class="alert alert-warning">
+            <span class="alert-icon">🔧</span>
+            <div>
+                <strong>High Memory Usage</strong><br>
+                • Reduce buffer sizes in config<br>
+                • Use smaller Whisper model<br>
+                • Enable swap space on Linux<br>
+                • Set memory limits in Docker
+            </div>
+        </div>
+
+        <h2>Performance Optimization</h2>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Component</th>
+                    <th>CPU Usage</th>
+                    <th>Memory</th>
+                    <th>Optimization</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Audio Capture</td>
+                    <td>~5%</td>
+                    <td>50MB</td>
+                    <td>Adjust buffer sizes</td>
+                </tr>
+                <tr>
+                    <td>VAD Processing</td>
+                    <td>~10%</td>
+                    <td>100MB</td>
+                    <td>Lower aggressiveness</td>
+                </tr>
+                <tr>
+                    <td>Whisper (base)</td>
+                    <td>~40%</td>
+                    <td>1GB</td>
+                    <td>Use GPU or smaller model</td>
+                </tr>
+                <tr>
+                    <td>Claude API</td>
+                    <td>~5%</td>
+                    <td>50MB</td>
+                    <td>Batch requests</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="navigation">
+            <a href="index.html" class="nav-button secondary">← Back to Overview</a>
+            <a href="#" class="nav-button" onclick="window.print()">Print Guide</a>
+        </div>
+    </div>
+
+    <script>
+        function showTab(tabName) {
+            // Hide all tab contents
+            const contents = document.querySelectorAll('.tab-content');
+            contents.forEach(content => content.classList.remove('active'));
+            
+            // Remove active class from all tabs
+            const tabs = document.querySelectorAll('.tab');
+            tabs.forEach(tab => tab.classList.remove('active'));
+            
+            // Show selected tab content
+            document.getElementById(tabName).classList.add('active');
+            
+            // Add active class to clicked tab
+            event.target.classList.add('active');
+        }
+
+        function copyCode(button) {
+            const codeBlock = button.nextElementSibling;
+            const text = codeBlock.textContent;
+            
+            navigator.clipboard.writeText(text).then(() => {
+                const originalText = button.textContent;
+                button.textContent = 'Copied!';
+                setTimeout(() => {
+                    button.textContent = originalText;
+                }, 2000);
+            });
+        }
+
+        // Handle checklist
+        document.querySelectorAll('.checklist-item input').forEach(checkbox => {
+            checkbox.addEventListener('change', function() {
+                if (this.checked) {
+                    this.parentElement.classList.add('checked');
+                } else {
+                    this.parentElement.classList.remove('checked');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

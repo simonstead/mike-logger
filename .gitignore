@@ -1,0 +1,77 @@
+# Environment variables
+.env
+.env.local
+.env.production
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual environments
+venv/
+env/
+ENV/
+
+# Data directories (audio files can be large)
+data/audio/*.wav
+data/audio/*.mp3
+data/transcripts/*.json
+data/tasks/*.json
+
+# Logs
+logs/
+*.log
+
+# Docker
+.dockerignore
+
+# Cache
+.cache/
+*.cache
+
+# OS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Whisper model cache
+.cache/whisper/
+
+# Redis data
+dump.rdb
+
+# Keep directory structure but ignore contents
+data/audio/.gitkeep
+data/transcripts/.gitkeep
+data/tasks/.gitkeep
+logs/.gitkeep

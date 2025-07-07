@@ -1,0 +1,81 @@
+version: '3.8'
+
+services:
+  # Processing container - handles Whisper STT and Claude API
+  processor:
+    build: 
+      context: .
+      dockerfile: Dockerfile.processor
+    container_name: mike-logger-processor
+    environment:
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      - WHISPER_MODEL=${WHISPER_MODEL:-base}
+      - PROCESSING_INTERVAL=${PROCESSING_INTERVAL:-30}
+      - LOG_LEVEL=${LOG_LEVEL:-INFO}
+    volumes:
+      # Shared volumes for audio exchange
+      - ./data/audio:/app/data/audio
+      - ./data/transcripts:/app/data/transcripts
+      - ./data/tasks:/app/data/tasks
+      - ./logs:/app/logs
+      # Mount whisper cache to avoid re-downloading models
+      - whisper-cache:/root/.cache/whisper
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 4G
+        reservations:
+          memory: 2G
+
+  # Optional: Redis for job queue (production setup)
+  redis:
+    image: redis:7-alpine
+    container_name: mike-logger-redis
+    command: redis-server --appendonly yes
+    volumes:
+      - redis-data:/data
+    ports:
+      - "6379:6379"
+    restart: unless-stopped
+
+  # Optional: Web dashboard for monitoring
+  dashboard:
+    build:
+      context: .
+      dockerfile: Dockerfile.dashboard
+    container_name: mike-logger-dashboard
+    environment:
+      - REDIS_URL=redis://redis:6379
+      - FLASK_ENV=${FLASK_ENV:-production}
+    volumes:
+      - ./data:/app/data:ro
+      - ./logs:/app/logs:ro
+    ports:
+      - "8080:8080"
+    depends_on:
+      - redis
+    restart: unless-stopped
+
+  # Optional: Prometheus metrics
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: mike-logger-prometheus
+    volumes:
+      - ./config/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus-data:/prometheus
+    ports:
+      - "9090:9090"
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+    restart: unless-stopped
+
+volumes:
+  whisper-cache:
+  redis-data:
+  prometheus-data:
+
+networks:
+  default:
+    name: mike-logger-network
