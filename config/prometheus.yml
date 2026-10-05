@@ -8,4 +8,3 @@ scrape_configs:
       - targets: ['processor:8000']
     metrics_path: /metrics
     scrape_interval: 30s
-EOF < /dev/null

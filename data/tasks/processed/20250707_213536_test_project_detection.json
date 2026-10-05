@@ -1,0 +1,73 @@
+{
+  "source_transcript": "/app/data/transcripts/project_detection_test.json",
+  "extracted_at": "2025-07-07T21:35:00.000000",
+  "task_count": 6,
+  "tasks": [
+    {
+      "type": "task",
+      "content": "Create a new project called weather_tracker for monitoring weather data",
+      "priority": "medium",
+      "deadline": null,
+      "confidence": 0.95,
+      "entities": {
+        "action": "create",
+        "topic": "weather tracker project"
+      }
+    },
+    {
+      "type": "task",
+      "content": "Add temperature logging functionality to the weather_tracker project",
+      "priority": "medium",
+      "deadline": null,
+      "confidence": 0.9,
+      "entities": {
+        "action": "add",
+        "topic": "temperature logging weather"
+      }
+    },
+    {
+      "type": "task",
+      "content": "Create a game with player scoring and level progression",
+      "priority": "medium",
+      "deadline": null,
+      "confidence": 0.85,
+      "entities": {
+        "action": "create",
+        "topic": "game player scoring"
+      }
+    },
+    {
+      "type": "task",
+      "content": "Write documentation for the Mike Logger API",
+      "priority": "medium",
+      "deadline": null,
+      "confidence": 0.9,
+      "entities": {
+        "action": "write",
+        "topic": "documentation mike logger"
+      }
+    },
+    {
+      "type": "task",
+      "content": "Build a CLI tool for file management",
+      "priority": "medium",
+      "deadline": null,
+      "confidence": 0.85,
+      "entities": {
+        "action": "build",
+        "topic": "cli tool file management"
+      }
+    },
+    {
+      "type": "task",
+      "content": "Update the README in the weather tracker to include API documentation",
+      "priority": "low",
+      "deadline": null,
+      "confidence": 0.9,
+      "entities": {
+        "action": "update",
+        "topic": "readme weather tracker"
+      }
+    }
+  ]
+}

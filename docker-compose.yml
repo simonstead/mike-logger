@@ -52,8 +52,10 @@ services:
       - REDIS_URL=redis://redis:6379
       - FLASK_ENV=${FLASK_ENV:-production}
     volumes:
-      - ./data:/app/data
+      - ./data:/app/data:ro
       - ./logs:/app/logs:ro
+      - ./docs:/app/docs:ro
+      - ./projects:/app/projects:ro
     ports:
       - "8080:8080"
     depends_on:

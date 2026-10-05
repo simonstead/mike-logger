@@ -1,0 +1,16 @@
+{
+  "source_transcript": "/app/data/transcripts/manual_submission.json",
+  "extracted_at": "2025-07-07T22:35:00.000000",
+  "task_count": 1,
+  "tasks": [{
+    "type": "task",
+    "content": "Use python and the supercollider package to create an infinite jukebox style, specifically using voice leading techniques so you can modulate the chord sequences programmatically in an interesting way. Stochastic, not repeating lengths though, because we want to make it interesting. adding some harmonies too",
+    "priority": "high",
+    "deadline": null,
+    "confidence": 0.95,
+    "entities": {
+      "action": "create",
+      "topic": "python supercollider infinite jukebox voice leading"
+    }
+  }]
+}

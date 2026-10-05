@@ -1,0 +1,19 @@
+{
+  "source_transcript": "/app/data/transcripts/web-text-input_20250707_224907.json",
+  "extracted_at": "2025-07-07T22:49:07.064961",
+  "task_count": 1,
+  "tasks": [
+    {
+      "type": "task",
+      "content": "deploy a hello world site to vercel",
+      "priority": "medium",
+      "deadline": null,
+      "confidence": 1.0,
+      "entities": {
+        "action": "process",
+        "topic": "manual task",
+        "source": "web-text-input"
+      }
+    }
+  ]
+}

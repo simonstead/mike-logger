@@ -92,5 +92,75 @@
     "description": "Project for: Create a game with player scoring and level progression...",
     "file_count": 0,
     "last_modified": "2025-07-07T21:30:31.224674"
+  },
+  "documentation_mike": {
+    "created_at": "2025-07-07T21:35:08.556793",
+    "keywords": [
+      "documentation",
+      "mike",
+      "logger"
+    ],
+    "description": "Project for: Write documentation for the Mike Logger API...",
+    "file_count": 0,
+    "last_modified": "2025-07-07T21:35:08.556803"
+  },
+  "cli": {
+    "created_at": "2025-07-07T21:35:16.153340",
+    "keywords": [
+      "cli",
+      "tool",
+      "file",
+      "management"
+    ],
+    "description": "Project for: Build a CLI tool for file management...",
+    "file_count": 0,
+    "last_modified": "2025-07-07T21:35:16.153362"
+  },
+  "readme_weather": {
+    "created_at": "2025-07-07T21:35:30.766284",
+    "keywords": [
+      "readme",
+      "weather",
+      "tracker"
+    ],
+    "description": "Project for: Update the README in the weather tracker to include API documentation...",
+    "file_count": 0,
+    "last_modified": "2025-07-07T21:35:30.766303"
+  },
+  "python_supercollider": {
+    "created_at": "2025-07-07T22:44:29.311299",
+    "keywords": [
+      "python",
+      "supercollider",
+      "infinite",
+      "jukebox",
+      "voice",
+      "leading"
+    ],
+    "description": "Project for: Use python and the supercollider package to create an infinite jukebox style, specifically using voi...",
+    "file_count": 0,
+    "last_modified": "2025-07-07T22:44:29.311341"
+  },
+  "manual_task": {
+    "created_at": "2025-07-08T00:08:08.901459",
+    "keywords": [
+      "manual",
+      "task"
+    ],
+    "description": "Project for: commit all your most recentr changes/work...",
+    "file_count": 0,
+    "last_modified": "2025-07-08T00:08:08.901475"
+  },
+  "simple": {
+    "created_at": "2025-07-08T00:10:15.414764",
+    "keywords": [
+      "python",
+      "hello",
+      "world",
+      "time"
+    ],
+    "description": "Project for: Create a simple hello world Python script that prints the current time...",
+    "file_count": 0,
+    "last_modified": "2025-07-08T00:10:15.414866"
   }
 }

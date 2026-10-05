@@ -1,0 +1,16 @@
+{
+  "source_transcript": "/app/data/transcripts/test_verbose.json",
+  "extracted_at": "2025-07-07T22:50:00.000000",
+  "task_count": 1,
+  "tasks": [{
+    "type": "task",
+    "content": "Create a simple Python script that prints 'Hello from verbose logging!' and explains what fibonacci numbers are",
+    "priority": "medium",
+    "deadline": null,
+    "confidence": 0.95,
+    "entities": {
+      "action": "create",
+      "topic": "python fibonacci script"
+    }
+  }]
+}

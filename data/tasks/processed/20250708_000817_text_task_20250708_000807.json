@@ -1,0 +1,19 @@
+{
+  "source_transcript": "/app/data/transcripts/web-text-input_20250708_000807.json",
+  "extracted_at": "2025-07-08T00:08:07.876525",
+  "task_count": 1,
+  "tasks": [
+    {
+      "type": "task",
+      "content": "commit all your most recentr changes/work",
+      "priority": "medium",
+      "deadline": null,
+      "confidence": 1.0,
+      "entities": {
+        "action": "process",
+        "topic": "manual task",
+        "source": "web-text-input"
+      }
+    }
+  ]
+}

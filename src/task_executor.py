@@ -8,6 +8,7 @@ import os
 import json
 import time
 import subprocess
+import threading
 from pathlib import Path
 from datetime import datetime
 from typing import Dict, Any, Optional, List
@@ -97,7 +98,7 @@ class TaskExecutor:
             'working_directory': str(self.projects_dir / project_name),
             'requires_mcp': self._requires_mcp(content),
             'sandbox_mode': self._is_risky(content),
-            'approval_required': priority == 'high' or self._is_risky(content),
+            'approval_required': False,  # Disabled approval - execute all tasks immediately
             'priority': priority
         }
         
@@ -223,6 +224,7 @@ class TaskExecutor:
             prompt = self._build_execution_prompt(task, context, work_dir)
             
             logger.info(f"Sending task to Claude API: {task['content']}")
+            logger.debug(f"Full prompt being sent:\n{prompt}")
             
             # Call Claude API using requests
             headers = {
@@ -254,6 +256,10 @@ class TaskExecutor:
             response_json = response.json()
             response_text = response_json['content'][0]['text'] if response_json.get('content') else ""
             
+            logger.info(f"Claude API Response Status: {response.status_code}")
+            logger.info(f"Claude's response length: {len(response_text)} characters")
+            logger.debug(f"Full Claude response:\n{response_text}")
+            
             # Parse and execute any code from the response
             execution_result = self._parse_and_execute_response(response_text, work_dir, context)
             
@@ -280,7 +286,40 @@ class TaskExecutor:
         """Build detailed prompt for Claude based on execution type"""
         execution_type = context['execution_type']
         
-        base_prompt = f"""You are an AI assistant helping to execute a task extracted from voice commands.
+        # Check if we should use enhanced context awareness
+        if os.getenv('ENABLE_CONTEXT_AWARENESS', 'false').lower() == 'true':
+            # Import the enhanced context analyzer
+            try:
+                from task_executor_v2 import ContextAnalyzer
+                analyzer = ContextAnalyzer(work_dir)
+                project_context = analyzer.analyze_project(task['content'])
+                context_prompt = analyzer.build_context_prompt(task, project_context)
+                
+                base_prompt = f"""{context_prompt}
+
+--- Task to Execute ---
+Task: {task['content']}
+Task Type: {task.get('type', 'task')}
+Priority: {task.get('priority', 'medium')}
+Confidence: {task.get('confidence', 1.0)}
+
+Working Directory: {work_dir}
+Project Context: {context['project']}
+
+Please execute this task by:
+"""
+            except Exception as e:
+                logger.warning(f"Could not load enhanced context: {e}")
+                # Fall back to basic prompt
+                base_prompt = self._build_basic_prompt(task, context, work_dir)
+        else:
+            base_prompt = self._build_basic_prompt(task, context, work_dir)
+        
+        return base_prompt + self._get_execution_instructions(execution_type)
+    
+    def _build_basic_prompt(self, task: Dict[str, Any], context: Dict[str, Any], work_dir: Path) -> str:
+        """Build basic prompt without enhanced context"""
+        return f"""You are an AI assistant helping to execute a task extracted from voice commands.
 
 Task: {task['content']}
 Task Type: {task.get('type', 'task')}
@@ -292,9 +331,12 @@ Project Context: {context['project']}
 
 Please execute this task by:
 """
+    
+    def _get_execution_instructions(self, execution_type: str) -> str:
+        """Get execution instructions based on type"""
         
         if execution_type == 'create':
-            base_prompt += """
+            return """
 1. Creating the requested file(s) in the working directory
 2. Return the complete file content in a code block with the filename as a comment
 3. Make the content informative and well-structured
@@ -306,31 +348,29 @@ file content here
 ```
 """
         elif execution_type == 'update':
-            base_prompt += """
+            return """
 1. Describe what changes would be made
 2. Provide the updated content in code blocks
 3. Explain the modifications made
 """
         elif execution_type == 'analyze':
-            base_prompt += """
+            return """
 1. Analyze the request
 2. Provide insights and recommendations
 3. Include any relevant code or examples
 """
         elif execution_type == 'remind':
-            base_prompt += """
+            return """
 1. Create a reminder note with the details
 2. Include the deadline if mentioned
 3. Format it clearly for future reference
 """
         else:
-            base_prompt += """
+            return """
 1. Understand and execute the task appropriately
 2. Provide any created content in code blocks
 3. Explain what was done
 """
-        
-        return base_prompt
     
     def _parse_and_execute_response(self, response: str, work_dir: Path, context: Dict[str, Any]) -> Dict[str, Any]:
         """Parse Claude's response and execute any file operations"""
@@ -346,6 +386,8 @@ file content here
             # First try to find code blocks with filenames
             code_blocks = re.findall(r'```(\S+)\n(.*?)```', response, re.DOTALL)
             
+            logger.info(f"Found {len(code_blocks)} code blocks in Claude's response")
+            
             for filename, content in code_blocks:
                 # Skip language identifiers that aren't filenames (but not if they have extensions)
                 if '.' not in filename and filename in ['python', 'javascript', 'bash', 'json', 'yaml', 'markdown', 'sh', 'py', 'js']:
@@ -355,6 +397,7 @@ file content here
                 file_path = work_dir / filename
                 file_path.parent.mkdir(parents=True, exist_ok=True)
                 
+                logger.info(f"Creating file: {filename} ({len(content)} characters)")
                 file_path.write_text(content.strip())
                 result['files_created'].append(str(file_path))
                 logger.info(f"Created file: {file_path}")
@@ -455,6 +498,11 @@ This is an automatically generated README file based on your voice command.
         """Process a single task file"""
         try:
             logger.info(f"Processing task file: {task_file}")
+            
+            # Check if file still exists (might have been processed already)
+            if not task_file.exists():
+                logger.debug(f"Task file no longer exists (likely already processed): {task_file}")
+                return
             
             with open(task_file, 'r') as f:
                 task_data = json.load(f)
@@ -567,6 +615,55 @@ class TaskFileHandler(FileSystemEventHandler):
                 self.executor.process_task_file(file_path)
             finally:
                 self.processing.discard(str(file_path))
+    
+    def on_moved(self, event):
+        """Ignore move events to prevent double processing"""
+        if not event.is_directory:
+            file_path = Path(event.src_path)
+            if str(file_path) in self.processing:
+                logger.debug(f"File being moved while processing: {file_path}")
+                self.processing.discard(str(file_path))
+
+
+def check_approved_tasks(executor: TaskExecutor):
+    """Check Redis for approved tasks periodically"""
+    logger.info("Started approval checking thread")
+    while True:
+        try:
+            if executor.redis_client:
+                # Get all approved task keys
+                approved_keys = executor.redis_client.keys('approved_tasks:*')
+                if approved_keys:
+                    logger.info(f"Found {len(approved_keys)} approved tasks to process")
+                
+                for key in approved_keys:
+                    try:
+                        # Get task data
+                        task_data = executor.redis_client.hgetall(key)
+                        if task_data:
+                            task = json.loads(task_data.get('task', '{}'))
+                            context = json.loads(task_data.get('context', '{}'))
+                            
+                            logger.info(f"Processing approved task: {task.get('content', 'Unknown')}")
+                            
+                            # Execute the task
+                            result = executor._execute_with_claude_api(task, context, Path(context.get('working_directory', executor.projects_dir / 'general')))
+                            
+                            # Save execution result
+                            executor._save_execution_result(task, context, result)
+                            
+                            # Delete the approved task from Redis
+                            executor.redis_client.delete(key)
+                            logger.info(f"Approved task completed and removed from queue: {key}")
+                            
+                    except Exception as e:
+                        logger.error(f"Error processing approved task {key}: {e}")
+                        
+        except Exception as e:
+            logger.error(f"Error checking approved tasks: {e}")
+        
+        # Check every 5 seconds
+        time.sleep(5)
 
 
 def main():
@@ -589,7 +686,14 @@ def main():
     observer.schedule(event_handler, str(executor.tasks_dir), recursive=False)
     observer.start()
     
-    logger.info("Task Execution Agent started. Watching for new tasks...")
+    # Start thread to check for approved tasks
+    logger.info("Starting approval checking thread...")
+    approval_thread = threading.Thread(target=check_approved_tasks, args=(executor,))
+    approval_thread.daemon = True
+    approval_thread.start()
+    logger.info(f"Approval thread started: {approval_thread.is_alive()}")
+    
+    logger.info("Task Execution Agent started. Watching for new tasks and approved tasks...")
     
     try:
         while True:

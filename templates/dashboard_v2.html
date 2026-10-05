@@ -1,0 +1,972 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mike Logger Dashboard</title>
+    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #0f172a;
+            color: #e2e8f0;
+            overflow-x: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%);
+            color: white;
+            padding: 1rem 2rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .header h1 {
+            font-size: 1.8rem;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .live-indicator {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            background: #10b981;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(1.2); }
+        }
+
+        .header-nav {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .header-nav a {
+            color: white;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            background: rgba(255,255,255,0.2);
+            border-radius: 4px;
+            transition: all 0.2s;
+        }
+
+        .header-nav a:hover {
+            background: rgba(255,255,255,0.3);
+            transform: translateY(-2px);
+        }
+
+        .main-grid {
+            display: grid;
+            grid-template-columns: 250px 1fr;
+            height: calc(100vh - 70px);
+        }
+
+        /* Sidebar */
+        .sidebar {
+            background: #1e293b;
+            padding: 1rem;
+            overflow-y: auto;
+            border-right: 1px solid #334155;
+        }
+
+        .sidebar h2 {
+            font-size: 1rem;
+            text-transform: uppercase;
+            color: #94a3b8;
+            margin-bottom: 1rem;
+        }
+
+        .project-list {
+            list-style: none;
+        }
+
+        .project-item {
+            padding: 0.75rem 1rem;
+            margin-bottom: 0.5rem;
+            background: #334155;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .project-item:hover {
+            background: #475569;
+            transform: translateX(4px);
+        }
+
+        .project-item.active {
+            background: #2563eb;
+        }
+
+        .project-stats {
+            font-size: 0.75rem;
+            color: #94a3b8;
+        }
+
+        .project-item.active .project-stats {
+            color: #e2e8f0;
+        }
+
+        /* Main Content */
+        .main-content {
+            padding: 2rem;
+            overflow-y: auto;
+            background: #0f172a;
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: #1e293b;
+            padding: 1.5rem;
+            border-radius: 12px;
+            border: 1px solid #334155;
+            transition: all 0.3s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 16px rgba(0,0,0,0.3);
+            border-color: #2563eb;
+        }
+
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: bold;
+            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            color: #94a3b8;
+            font-size: 0.875rem;
+        }
+
+        .stat-change {
+            margin-top: 0.5rem;
+            font-size: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        .stat-change.positive {
+            color: #10b981;
+        }
+
+        .stat-change.negative {
+            color: #ef4444;
+        }
+
+        /* Activity Timeline */
+        .activity-section {
+            background: #1e293b;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            border: 1px solid #334155;
+        }
+
+        .activity-section h2 {
+            margin-bottom: 1rem;
+            color: #e2e8f0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .activity-timeline {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .activity-item {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            position: relative;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .activity-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            flex-shrink: 0;
+        }
+
+        .activity-icon.audio {
+            background: #3b82f6;
+        }
+
+        .activity-icon.transcript {
+            background: #8b5cf6;
+        }
+
+        .activity-icon.task {
+            background: #10b981;
+        }
+
+        .activity-icon.execution {
+            background: #f59e0b;
+        }
+
+        .activity-content {
+            flex: 1;
+        }
+
+        .activity-title {
+            font-weight: 500;
+            margin-bottom: 0.25rem;
+        }
+
+        .activity-meta {
+            font-size: 0.75rem;
+            color: #94a3b8;
+        }
+
+        .activity-timestamp {
+            font-size: 0.75rem;
+            color: #64748b;
+        }
+
+        /* Charts */
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .chart-container {
+            background: #1e293b;
+            padding: 1.5rem;
+            border-radius: 12px;
+            border: 1px solid #334155;
+        }
+
+        .chart-container h3 {
+            margin-bottom: 1rem;
+            color: #e2e8f0;
+        }
+
+        .chart-container canvas {
+            max-height: 300px;
+        }
+
+        /* Project Details */
+        .project-details {
+            background: #1e293b;
+            border-radius: 12px;
+            padding: 1.5rem;
+            border: 1px solid #334155;
+        }
+
+        .project-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .project-title {
+            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .project-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .btn {
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            font-size: 0.875rem;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary {
+            background: #2563eb;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #1d4ed8;
+        }
+
+        .btn-secondary {
+            background: #334155;
+            color: #e2e8f0;
+        }
+
+        .btn-secondary:hover {
+            background: #475569;
+        }
+
+        .file-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .file-card {
+            background: #334155;
+            padding: 1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: center;
+        }
+
+        .file-card:hover {
+            background: #475569;
+            transform: translateY(-2px);
+        }
+
+        .file-icon {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .file-name {
+            font-size: 0.875rem;
+            word-break: break-word;
+        }
+
+        .file-size {
+            font-size: 0.75rem;
+            color: #94a3b8;
+            margin-top: 0.25rem;
+        }
+
+        /* Loading states */
+        .loading {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            color: #94a3b8;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid #334155;
+            border-top-color: #2563eb;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .sidebar {
+                display: none;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .charts-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>
+            🎤 Mike Logger Dashboard
+            <span class="live-indicator" title="Live updates active"></span>
+        </h1>
+        <div class="header-nav">
+            <a href="/messaging">💬 Messaging</a>
+            <a href="/docs">📚 Documentation</a>
+            <a href="/api/stats">📊 API</a>
+        </div>
+    </div>
+
+    <div class="main-grid">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <h2>Projects</h2>
+            <ul class="project-list" id="project-list">
+                <li class="project-item active" data-project="all">
+                    <span>📊 All Projects</span>
+                    <span class="project-stats" id="all-files-count">0 files</span>
+                </li>
+            </ul>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Stats Grid -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value" id="audio-count">0</div>
+                    <div class="stat-label">Audio Files</div>
+                    <div class="stat-change positive" id="audio-change">
+                        <span>↑</span>
+                        <span>0 today</span>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="transcript-count">0</div>
+                    <div class="stat-label">Transcripts</div>
+                    <div class="stat-change positive" id="transcript-change">
+                        <span>↑</span>
+                        <span>0 today</span>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="task-count">0</div>
+                    <div class="stat-label">Tasks Extracted</div>
+                    <div class="stat-change positive" id="task-change">
+                        <span>↑</span>
+                        <span>0 today</span>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="execution-count">0</div>
+                    <div class="stat-label">Tasks Executed</div>
+                    <div class="stat-change positive" id="execution-change">
+                        <span>↑</span>
+                        <span>0 today</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Activity Timeline -->
+            <div class="activity-section">
+                <h2>
+                    <span>⚡</span>
+                    <span>Live Activity</span>
+                </h2>
+                <div class="activity-timeline" id="activity-timeline">
+                    <div class="loading">
+                        <div class="spinner"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Charts -->
+            <div class="charts-grid">
+                <div class="chart-container">
+                    <h3>📈 Activity Over Time</h3>
+                    <canvas id="activity-chart"></canvas>
+                </div>
+                <div class="chart-container">
+                    <h3>📊 Task Distribution</h3>
+                    <canvas id="task-chart"></canvas>
+                </div>
+            </div>
+
+            <!-- Project Details -->
+            <div class="project-details" id="project-details" style="display: none;">
+                <div class="project-header">
+                    <h2 class="project-title" id="project-title">Project Name</h2>
+                    <div class="project-actions">
+                        <button class="btn btn-secondary" onclick="refreshProject()">
+                            <span>🔄</span>
+                            <span>Refresh</span>
+                        </button>
+                        <button class="btn btn-primary" onclick="openProject()">
+                            <span>📂</span>
+                            <span>Open Files</span>
+                        </button>
+                    </div>
+                </div>
+                <div class="file-grid" id="project-files">
+                    <!-- Files will be loaded here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Initialize Socket.IO connection
+        const socket = io();
+        
+        // State
+        let currentProject = 'all';
+        let stats = {
+            audio: 0,
+            transcripts: 0,
+            tasks: 0,
+            executions: 0
+        };
+        let todayStats = {
+            audio: 0,
+            transcripts: 0,
+            tasks: 0,
+            executions: 0
+        };
+        
+        // Charts
+        let activityChart = null;
+        let taskChart = null;
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeCharts();
+            loadInitialData();
+            setupSocketListeners();
+            setupEventListeners();
+        });
+        
+        // Setup event listeners
+        function setupEventListeners() {
+            // Project selection
+            document.getElementById('project-list').addEventListener('click', function(e) {
+                const item = e.target.closest('.project-item');
+                if (item) {
+                    selectProject(item.dataset.project);
+                }
+            });
+        }
+        
+        // Socket.IO listeners
+        function setupSocketListeners() {
+            socket.on('connect', function() {
+                console.log('Connected to server');
+                document.querySelector('.live-indicator').style.background = '#10b981';
+            });
+            
+            socket.on('disconnect', function() {
+                console.log('Disconnected from server');
+                document.querySelector('.live-indicator').style.background = '#ef4444';
+            });
+            
+            socket.on('stats_update', function(data) {
+                updateStats(data);
+            });
+            
+            socket.on('new_activity', function(activity) {
+                addActivityItem(activity);
+                updateCharts();
+            });
+            
+            socket.on('project_update', function(data) {
+                updateProjectList(data.projects);
+            });
+        }
+        
+        // Load initial data
+        async function loadInitialData() {
+            try {
+                // Load stats
+                const statsResponse = await fetch('/api/stats');
+                const statsData = await statsResponse.json();
+                updateStats(statsData);
+                
+                // Load projects
+                const projectsResponse = await fetch('/api/projects');
+                const projects = await projectsResponse.json();
+                updateProjectList(projects);
+                
+                // Load recent activity
+                const activityResponse = await fetch('/api/activity');
+                const activities = await activityResponse.json();
+                displayActivities(activities);
+                
+            } catch (error) {
+                console.error('Error loading initial data:', error);
+            }
+        }
+        
+        // Update statistics
+        function updateStats(data) {
+            // Update values
+            document.getElementById('audio-count').textContent = data.audio_files || 0;
+            document.getElementById('transcript-count').textContent = data.transcripts || 0;
+            document.getElementById('task-count').textContent = data.tasks || 0;
+            document.getElementById('execution-count').textContent = data.executions || 0;
+            
+            // Update today's changes
+            if (data.today) {
+                updateStatChange('audio-change', data.today.audio || 0);
+                updateStatChange('transcript-change', data.today.transcripts || 0);
+                updateStatChange('task-change', data.today.tasks || 0);
+                updateStatChange('execution-change', data.today.executions || 0);
+            }
+        }
+        
+        function updateStatChange(elementId, value) {
+            const element = document.getElementById(elementId);
+            element.classList.toggle('positive', value >= 0);
+            element.classList.toggle('negative', value < 0);
+            element.innerHTML = `
+                <span>${value >= 0 ? '↑' : '↓'}</span>
+                <span>${Math.abs(value)} today</span>
+            `;
+        }
+        
+        // Update project list
+        function updateProjectList(projects) {
+            const projectList = document.getElementById('project-list');
+            const allFilesCount = projects.reduce((sum, p) => sum + p.file_count, 0);
+            
+            // Update "All Projects" count
+            document.getElementById('all-files-count').textContent = `${allFilesCount} files`;
+            
+            // Clear existing projects (except "All Projects")
+            const existingItems = projectList.querySelectorAll('.project-item:not([data-project="all"])');
+            existingItems.forEach(item => item.remove());
+            
+            // Add projects
+            projects.forEach(project => {
+                const li = document.createElement('li');
+                li.className = 'project-item';
+                li.dataset.project = project.name;
+                li.innerHTML = `
+                    <span>📁 ${project.name}</span>
+                    <span class="project-stats">${project.file_count} files</span>
+                `;
+                projectList.appendChild(li);
+            });
+        }
+        
+        // Select project
+        function selectProject(projectName) {
+            currentProject = projectName;
+            
+            // Update active state
+            document.querySelectorAll('.project-item').forEach(item => {
+                item.classList.toggle('active', item.dataset.project === projectName);
+            });
+            
+            // Show/hide project details
+            if (projectName === 'all') {
+                document.getElementById('project-details').style.display = 'none';
+            } else {
+                loadProjectDetails(projectName);
+            }
+        }
+        
+        // Load project details
+        async function loadProjectDetails(projectName) {
+            try {
+                const response = await fetch(`/api/projects/${projectName}`);
+                const project = await response.json();
+                
+                document.getElementById('project-title').innerHTML = `
+                    <span>📁</span>
+                    <span>${projectName}</span>
+                `;
+                
+                // Display files
+                const filesGrid = document.getElementById('project-files');
+                filesGrid.innerHTML = '';
+                
+                if (project.files && project.files.length > 0) {
+                    project.files.forEach(file => {
+                        const fileCard = createFileCard(file);
+                        filesGrid.appendChild(fileCard);
+                    });
+                } else {
+                    filesGrid.innerHTML = '<div class="loading">No files in this project yet</div>';
+                }
+                
+                document.getElementById('project-details').style.display = 'block';
+                
+            } catch (error) {
+                console.error('Error loading project details:', error);
+            }
+        }
+        
+        // Create file card
+        function createFileCard(file) {
+            const div = document.createElement('div');
+            div.className = 'file-card';
+            div.onclick = () => viewFile(file.path);
+            
+            const icon = getFileIcon(file.name);
+            
+            div.innerHTML = `
+                <div class="file-icon">${icon}</div>
+                <div class="file-name">${file.name}</div>
+                <div class="file-size">${formatFileSize(file.size)}</div>
+            `;
+            
+            return div;
+        }
+        
+        // Get file icon based on extension
+        function getFileIcon(filename) {
+            const ext = filename.split('.').pop().toLowerCase();
+            const icons = {
+                'py': '🐍',
+                'js': '🟨',
+                'json': '📋',
+                'md': '📝',
+                'txt': '📄',
+                'wav': '🎵',
+                'mp3': '🎵',
+                'jpg': '🖼️',
+                'png': '🖼️',
+                'gif': '🖼️',
+                'pdf': '📕',
+                'zip': '📦',
+                'html': '🌐',
+                'css': '🎨'
+            };
+            return icons[ext] || '📄';
+        }
+        
+        // Display activities
+        function displayActivities(activities) {
+            const timeline = document.getElementById('activity-timeline');
+            timeline.innerHTML = '';
+            
+            activities.forEach(activity => {
+                addActivityItem(activity, false);
+            });
+        }
+        
+        // Add activity item
+        function addActivityItem(activity, animate = true) {
+            const timeline = document.getElementById('activity-timeline');
+            
+            // Remove loading state if present
+            const loading = timeline.querySelector('.loading');
+            if (loading) {
+                loading.remove();
+            }
+            
+            const item = document.createElement('div');
+            item.className = 'activity-item';
+            if (!animate) {
+                item.style.animation = 'none';
+            }
+            
+            const icon = getActivityIcon(activity.type);
+            const time = new Date(activity.timestamp).toLocaleTimeString();
+            
+            item.innerHTML = `
+                <div class="activity-icon ${activity.type}">
+                    ${icon}
+                </div>
+                <div class="activity-content">
+                    <div class="activity-title">${activity.title}</div>
+                    <div class="activity-meta">${activity.description}</div>
+                </div>
+                <div class="activity-timestamp">${time}</div>
+            `;
+            
+            // Add to timeline (newest first)
+            timeline.insertBefore(item, timeline.firstChild);
+            
+            // Keep only last 20 activities
+            while (timeline.children.length > 20) {
+                timeline.removeChild(timeline.lastChild);
+            }
+        }
+        
+        // Get activity icon
+        function getActivityIcon(type) {
+            const icons = {
+                'audio': '🎤',
+                'transcript': '📝',
+                'task': '✅',
+                'execution': '⚡'
+            };
+            return icons[type] || '📌';
+        }
+        
+        // Initialize charts
+        function initializeCharts() {
+            // Activity chart
+            const activityCtx = document.getElementById('activity-chart').getContext('2d');
+            activityChart = new Chart(activityCtx, {
+                type: 'line',
+                data: {
+                    labels: getLast24Hours(),
+                    datasets: [{
+                        label: 'Audio',
+                        data: Array(24).fill(0),
+                        borderColor: '#3b82f6',
+                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                        tension: 0.4
+                    }, {
+                        label: 'Tasks',
+                        data: Array(24).fill(0),
+                        borderColor: '#10b981',
+                        backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    aspectRatio: 2,
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: '#e2e8f0'
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: {
+                                color: '#334155'
+                            },
+                            ticks: {
+                                color: '#94a3b8'
+                            }
+                        },
+                        y: {
+                            grid: {
+                                color: '#334155'
+                            },
+                            ticks: {
+                                color: '#94a3b8'
+                            }
+                        }
+                    }
+                }
+            });
+            
+            // Task distribution chart
+            const taskCtx = document.getElementById('task-chart').getContext('2d');
+            taskChart = new Chart(taskCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['High Priority', 'Medium Priority', 'Low Priority'],
+                    datasets: [{
+                        data: [10, 20, 5],
+                        backgroundColor: [
+                            '#ef4444',
+                            '#f59e0b',
+                            '#10b981'
+                        ],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    aspectRatio: 1.5,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                color: '#e2e8f0',
+                                padding: 20
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        // Get last 24 hours labels
+        function getLast24Hours() {
+            const labels = [];
+            const now = new Date();
+            for (let i = 23; i >= 0; i--) {
+                const hour = new Date(now - i * 60 * 60 * 1000);
+                labels.push(hour.getHours() + ':00');
+            }
+            return labels;
+        }
+        
+        // Update charts
+        function updateCharts() {
+            // This would be implemented with real data
+            // For now, just trigger a chart update
+            activityChart.update();
+            taskChart.update();
+        }
+        
+        // Utility functions
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+        
+        // View file
+        function viewFile(path) {
+            window.open(`/api/file/${encodeURIComponent(path)}`, '_blank');
+        }
+        
+        // Refresh project
+        function refreshProject() {
+            if (currentProject !== 'all') {
+                loadProjectDetails(currentProject);
+            }
+        }
+        
+        // Open project
+        function openProject() {
+            // This could open the project in a file manager or IDE
+            alert('Open project functionality would be implemented here');
+        }
+    </script>
+</body>
+</html>

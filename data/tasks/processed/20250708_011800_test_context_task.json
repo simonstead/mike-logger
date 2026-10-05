@@ -1,0 +1,11 @@
+{
+    "content": "Update the hello world script to add a function that returns the current date and time formatted nicely",
+    "type": "task",
+    "source": "manual_test",
+    "project": "simple",
+    "confidence": 1.0,
+    "priority": "medium",
+    "timestamp": "2025-07-08T00:30:00.000000",
+    "transcript_id": "test_context_awareness",
+    "original_audio": "test_context.wav"
+}
